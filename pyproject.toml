@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "speech-commands"
+version = "0.1.0"
+description = ""
+authors = ["Nik Bamert <ndbamert@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = {url="https://download.pytorch.org/whl/cpu/torch-2.0.0%2Bcpu-cp310-cp310-linux_x86_64.whl"}
+torchaudio = {url="https://download.pytorch.org/whl/cpu/torchaudio-2.0.0%2Bcpu-cp310-cp310-linux_x86_64.whl"}
+tqdm = "^4.65.0"
+numpy = "^1.25.1"
+sounddevice = "^0.4.6"
+thop = "^0.1.1.post2209072238"
+onnx = "^1.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

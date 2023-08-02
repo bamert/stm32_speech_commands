@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ONNX Runtime Web Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.9.0/dist/ort.min.js"></script>
+</head>
+
+<body>
+    <h1>ONNX Runtime Web Example</h1>
+    <select id="input-device"></select>
+    <button id="startRecordingButton">Start Recording</button>
+    <br>
+    <textarea id="model-output" rows=30 cols=50></textarea>
+    <script>
+        let bufferSize = 8192;
+        let sampleRate = 8000;
+        let buffer = [];
+        let bufferLength = sampleRate; // Buffer to hold 1 second of samples
+        let bufferFill = 0;
+        let session;
+        let modelUrl = 'model.onnx';
+        let startRecordingButton = document.getElementById('startRecordingButton');
+        const SC_CLASSES = [
+            'background_noise_',
+            'backward',
+            'bed',
+            'bird',
+            'cat',
+            'dog',
+            'down',
+            'eight',
+            'five',
+            'follow',
+            'forward',
+            'four',
+            'go',
+            'happy',
+            'house',
+            'learn',
+            'left',
+            'marvin',
+            'nine',
+            'no',
+            'off',
+            'on',
+            'one',
+            'right',
+            'seven',
+            'sheila',
+            'six',
+            'stop',
+            'three',
+            'tree',
+            'two',
+            'up',
+            'visual',
+            'wow',
+            'yes',
+            'zero']
+
+
+        function appendTextarea(line) {
+            let textarea = document.getElementById('model-output');
+            textarea.value += line + '\r\n';
+        }
+        async function loadModel() {
+            session = await ort.InferenceSession.create(modelUrl);
+            appendTextarea('Model loaded');
+        }
+
+        loadModel();
+
+        function onTimerElapsed(samples) {
+            if (!session) {
+                appendTextarea('Model is not loaded yet');
+                return;
+            }
+
+            // Run the model
+            const inputTensor = new ort.Tensor('float32', Float32Array.from(samples), [1, 1, bufferLength]);
+            const inputs = {input: inputTensor}; // 'input' here should match the input name in your model
+            session.run(inputs).then((outputMap) => {
+                // Let's assume outputMap.output.data is your dictionary
+                let dataDict = outputMap.output.data;
+
+                // Convert the dictionary to a list
+                let data = Object.values(dataDict);
+
+                // Convert outputData to softmax probabilities
+                let probs = data.map(value => Math.exp(value)); //softmax(outputData);
+                let largestIndex = probs.indexOf(Math.max(...probs));
+
+                // Sort probabilities in descending order to find the highest and second highest
+                probs.sort((a, b) => b - a);
+
+                let highestProb = probs[0];
+                let secondHighestProb = probs[1];
+
+                // Calculate confidence
+                let confidence = highestProb - secondHighestProb;
+
+                // Get prediction names
+                let predName = SC_CLASSES[largestIndex];
+
+                // Use output data here
+                if (confidence > 0.75) {
+                    appendTextarea('Confidence:' + confidence + ', Prediction:' + predName);
+                }
+            });
+        }
+        startRecordingButton.onclick = function () {
+            const chosenDevice = document.getElementById('input-device');
+            const chosenDeviceId = chosenDevice.value;
+            const chosenDeviceName = chosenDevice.options[chosenDevice.selectedIndex].text;
+            appendTextarea("Listening on " + chosenDeviceName);
+            navigator.mediaDevices.getUserMedia({
+                audio: {
+                    deviceId: chosenDeviceId
+                }
+            })
+                .then(function (stream) {
+                    let context = new AudioContext({sampleRate: sampleRate});
+                    let source = context.createMediaStreamSource(stream);
+                    let processor = context.createScriptProcessor(bufferSize / 2, 1, 1); // Keep bufferSize as 2000
+                    source.connect(processor);
+                    processor.connect(context.destination);
+                    processor.onaudioprocess = function (e) {
+                        let inputData = e.inputBuffer.getChannelData(0);
+                        for (let sample of inputData) {
+                            if (bufferFill < bufferLength) {
+                                buffer[bufferFill++] = sample;
+                            } else {
+                                buffer.push(sample);
+                                buffer.shift(); // This removes the first element, thus keeping the buffer size constant
+                            }
+                        }
+                        // If buffer is full (8000 samples or 1 sec of audio)
+                        if (bufferFill >= bufferLength) {
+                            let lastSecondBuffer = buffer.slice(-8000); // Copy the entire buffer
+                            onTimerElapsed(lastSecondBuffer); // Pass the last 1 second of audio
+                        }
+                    };
+                });
+        };
+        navigator.mediaDevices.getUserMedia({audio: true, video: false})
+            .then(function (stream) {
+                // Once we have access, get the list of devices
+                return navigator.mediaDevices.enumerateDevices();
+            })
+            .then(function (devices) {
+                // Filter out the audio input devices
+                let audioInputDevices = devices.filter(device => device.kind === 'audioinput');
+
+                // Assuming you have a select element with id 'input-device'
+                let select = document.getElementById('input-device');
+
+                // Fill the select with the available devices
+                for (let device of audioInputDevices) {
+                    let option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label;
+                    select.appendChild(option);
+                }
+            });
+
+
+
+    </script>
+</body>
+
+</html>

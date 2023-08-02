@@ -1,0 +1,8 @@
+SpeechCommands
+__pycache__
+.venv
+model
+model_adam*
+*.tar.gz
+src/__pycache__
+model.onnx
