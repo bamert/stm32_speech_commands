@@ -1,3 +1,4 @@
+from tqdm import tqdm
 def number_of_correct(pred, target):
     # count number of correct predictions
     return pred.squeeze().eq(target).sum().item()
@@ -12,8 +13,7 @@ def get_max_activation(tensor):
 def test(model, transform, test_loader, device, epoch):
     model.eval()
     correct = 0
-    for data, target in test_loader:
-
+    for (data, target) in tqdm(test_loader):
         data = data.to(device)
         target = target.to(device)
 

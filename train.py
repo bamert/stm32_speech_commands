@@ -65,5 +65,5 @@ if __name__ == "__main__":
             test(model, transform, test_loader, device, epoch)
             scheduler.step()
     torch.save(model.state_dict(), "model")
-    export_onnx_model(model, new_sample_rate, "model.onnx")
+    export_onnx_model(model, new_sample_rate, "model_train.onnx")
 
