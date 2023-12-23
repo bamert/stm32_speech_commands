@@ -1,6 +1,9 @@
 import os
+import torchaudio.transforms as T
 import torch
 from torchaudio.datasets import SPEECHCOMMANDS
+from pytorch_lightning import LightningDataModule
+import torch.utils.data
 
 SC_CLASSES = [
     "background_noise_",
@@ -43,7 +46,7 @@ SC_CLASSES = [
 
 
 class SubsetSC(SPEECHCOMMANDS):
-    def __init__(self, transform=None, subset: str = ""):
+    def __init__(self, transform=None, subset: str = "", new_sample_rate=8000):
         super().__init__("./", download=True)
         self.transform = transform
 
@@ -54,18 +57,9 @@ class SubsetSC(SPEECHCOMMANDS):
                     os.path.normpath(os.path.join(self._path, line.strip()))
                     for line in fileobj
                 ]
-
-        # Create a mapping of label to index
-        # unique_labels = sorted(list(set(self.labels())))
-        # self.label_to_idx = {label: idx for idx, label in enumerate(unique_labels)}
-
-        # Initialize an empty set to store unique labels
-        # self.unique_labels = set()
-
-        # Iterate over all items in the ParentDataset and add each unique label to the set
-        # for i in range(len(self)):
-        # item = super().__getitem__(i)
-        # self.unique_labels.add(item[2])
+        self.resample = T.Resample(orig_freq=16000, new_freq=new_sample_rate)
+        self.mean = torch.tensor(-2.7432e-06)
+        self.std = torch.tensor(0.7073) 
         # Create a dictionary that maps each unique label to a unique integer
         self.label_to_int = {label: i for i, label in enumerate(sorted(SC_CLASSES))}
         self.int_to_label = {i: label for i, label in enumerate(sorted(SC_CLASSES))}
@@ -83,37 +77,68 @@ class SubsetSC(SPEECHCOMMANDS):
         item = super().__getitem__(index)
         waveform = item[0]
         label = item[2]
-        # Map the label to an integer
-        label = torch.tensor(self.label_to_int[label])
+        waveform = self.resample(waveform)
+        # Pad or trim the waveform to a fixed length (e.g., corresponding to 8000 samples)
+        target_length = 8000  # Adjust as needed
+        if waveform.size(1) > target_length:
+            waveform = waveform[:, :target_length]  # Trim
+        elif waveform.size(1) < target_length:
+            # Pad
+            padding_size = target_length - waveform.size(1)
+            padding = torch.zeros((waveform.size(0), padding_size))
+            waveform = torch.cat((waveform, padding), dim=1)
 
-        # One-hot encode  NOTE: not needed
-        if self.transform:
-            waveform = self.transform(waveform)
+        waveform = (waveform - self.mean) / self.std
+        label = torch.tensor(self.label_to_int[label])
 
         return waveform, label
 
-    def num_labels(self) -> int:
-        return len(self.label_to_int.keys())
+    @staticmethod
+    def num_labels() -> int:
+        return len(SC_CLASSES)
 
 
-def get_train_loader(train_set, batch_size: int, collate_fn, num_workers, pin_memory):
-    return torch.utils.data.DataLoader(
-        train_set,
-        batch_size=batch_size,
-        shuffle=True,
-        collate_fn=collate_fn,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-    )
+class AudioDataModule(LightningDataModule):
+    def __init__(self, batch_size, num_workers, pin_memory):
+        super().__init__()
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.pin_memory = pin_memory
+        self.train_set = SubsetSC(subset="training")
+        self.val_set = SubsetSC(subset="validation")
+        self.test_set = SubsetSC(subset="testing")
 
+    def setup(self, stage=None):
+        pass
+        #if stage == "fit" or stage is None:
+        #    if stage == "test" or stage is None:
+    def num_classes(self) -> int:
+        return SubsetSC.num_labels()
 
-def get_test_loader(test_set, batch_size: int, collate_fn, num_workers, pin_memory):
-    return torch.utils.data.DataLoader(
-        test_set,
-        batch_size=batch_size,
-        shuffle=False,
-        drop_last=False,
-        collate_fn=collate_fn,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
-    )
+    def train_dataloader(self):
+        return torch.utils.data.DataLoader(
+            self.train_set,
+            batch_size=self.batch_size,
+            shuffle=True,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+        )
+
+    def val_dataloader(self):
+        return torch.utils.data.DataLoader(
+            self.val_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+        )
+
+    def test_dataloader(self):
+        return torch.utils.data.DataLoader(
+            self.test_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+        )
+

@@ -1,6 +1,9 @@
 import torch.nn as nn
+import torch
 import torch.nn.functional as F
 
+import pytorch_lightning as pl
+import torch.optim as optim
 
 class M5(nn.Module):
     def __init__(self, n_input=1, n_output=35, stride=8, n_channel=32):
@@ -38,3 +41,53 @@ class M5(nn.Module):
         x = x.permute(0, 2, 1)
         x = self.fc1(x)
         return F.log_softmax(x, dim=2)
+
+
+class AudioClassifier(pl.LightningModule):
+    def __init__(self, num_labels):
+        super().__init__()
+        self.val_correct_outputs = 0
+        self.val_total_outputs = 0
+        self.model = M5(n_input=1, n_output=num_labels)
+
+    def forward(self, x):
+        return self.model(x)
+
+    def training_step(self, batch, batch_idx):
+        data, target = batch
+        output = self(data)
+        loss = F.nll_loss(output.squeeze(), target)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        data, target = batch
+        output = self(data)
+        loss = F.nll_loss(output.squeeze(), target)
+
+        # Calculate accuracy
+        pred = output.argmax(dim=-1)#, keepdim=True)  # Get the index of the max log-probability
+
+        correct = pred.squeeze().eq(target).sum().item()
+        self.val_correct_outputs += correct
+        self.val_total_outputs += target.size(0)
+
+        self.log('val_loss', loss, prog_bar=True, on_epoch=True)
+        #self.log('val_accuracy', accuracy, on_epoch=True)
+
+        # Return a dictionary that includes loss and accuracy
+        return {"val_loss": loss}
+    def on_validation_epoch_end(self):
+
+        # Aggregate accuracies
+        avg_accuracy = self.val_correct_outputs / self.val_total_outputs 
+        self.log('val_accuracy', avg_accuracy, prog_bar=True, on_epoch=True)
+        self.val_total_outputs = 0
+        self.val_correct_outputs = 0
+
+
+    def configure_optimizers(self):
+        optimizer = optim.Adam(self.parameters(), lr=0.01, weight_decay=0.0001)
+        scheduler = {'scheduler': optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1),
+                     'interval': 'epoch'}  # Change interval to 'step' if needed
+        return [optimizer], [scheduler]
+
