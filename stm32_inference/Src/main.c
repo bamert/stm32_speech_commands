@@ -19,10 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "app_x-cube-ai.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -132,25 +132,32 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   //int32_t input_buf_l[8000] = { 0 };
-  int32_t *input_buf_l = (int32_t*)malloc(8000 * sizeof(int32_t));
+//#int16_t *input_buf_l = (int16_t*)malloc(7000 * sizeof(int16_t));
+  uint16_t input_buf_l[8000] __attribute__((aligned(2)));
 
-  printf("Attempting init of fdsdm\n");
+  if(input_buf_l == NULL) {
+      printf("Malloc failed\n\r");
+  } else {
+      printf("Malloc succeeded\n\r");
+  }
+
+  printf("Attempting init of fdsdm\n\r");
   if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
-    printf("FDSDM Filter 0 failed\n");
+    printf("FDSDM Filter 0 failed\n\r");
   }else{
-    printf("FDSDM Filter 0 ok\n");
+    printf("FDSDM Filter 0 ok\n\r");
   }
 
   int f_s = SystemCoreClock / hdfsdm1_channel2.Init.OutputClock.Divider
       / hdfsdm1_filter0.Init.FilterParam.Oversampling
       / hdfsdm1_filter0.Init.FilterParam.IntOversampling;
 
-  printf("f_s:%i", f_s);
+  printf("f_s:%i\n\r", f_s);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  printf("Init Complete");
+  printf("Init Complete\n\r");
   // Just want to check if this actually exists.
   while (1)
   {
@@ -273,8 +280,8 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_filter0.Init.RegularParam.FastMode = ENABLE;
   hdfsdm1_filter0.Init.RegularParam.DmaMode = ENABLE;
   hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
-  hdfsdm1_filter0.Init.FilterParam.Oversampling = 128;
-  hdfsdm1_filter0.Init.FilterParam.IntOversampling = 1;
+  hdfsdm1_filter0.Init.FilterParam.Oversampling = 10;
+  hdfsdm1_filter0.Init.FilterParam.IntOversampling = 10;
   if (HAL_DFSDM_FilterInit(&hdfsdm1_filter0) != HAL_OK)
   {
     Error_Handler();
@@ -293,7 +300,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel1.Instance = DFSDM1_Channel1;
   hdfsdm1_channel1.Init.OutputClock.Activation = ENABLE;
   hdfsdm1_channel1.Init.OutputClock.Selection = DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM;
-  hdfsdm1_channel1.Init.OutputClock.Divider = 2;
+  hdfsdm1_channel1.Init.OutputClock.Divider = 100;
   hdfsdm1_channel1.Init.Input.Multiplexer = DFSDM_CHANNEL_EXTERNAL_INPUTS;
   hdfsdm1_channel1.Init.Input.DataPacking = DFSDM_CHANNEL_STANDARD_MODE;
   hdfsdm1_channel1.Init.Input.Pins = DFSDM_CHANNEL_FOLLOWING_CHANNEL_PINS;
@@ -302,7 +309,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel1.Init.Awd.FilterOrder = DFSDM_CHANNEL_FASTSINC_ORDER;
   hdfsdm1_channel1.Init.Awd.Oversampling = 1;
   hdfsdm1_channel1.Init.Offset = 0;
-  hdfsdm1_channel1.Init.RightBitShift = 0x00;
+  hdfsdm1_channel1.Init.RightBitShift = 0x08;
   if (HAL_DFSDM_ChannelInit(&hdfsdm1_channel1) != HAL_OK)
   {
     Error_Handler();
@@ -310,7 +317,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel2.Instance = DFSDM1_Channel2;
   hdfsdm1_channel2.Init.OutputClock.Activation = ENABLE;
   hdfsdm1_channel2.Init.OutputClock.Selection = DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM;
-  hdfsdm1_channel2.Init.OutputClock.Divider = 2;
+  hdfsdm1_channel2.Init.OutputClock.Divider = 100;
   hdfsdm1_channel2.Init.Input.Multiplexer = DFSDM_CHANNEL_EXTERNAL_INPUTS;
   hdfsdm1_channel2.Init.Input.DataPacking = DFSDM_CHANNEL_STANDARD_MODE;
   hdfsdm1_channel2.Init.Input.Pins = DFSDM_CHANNEL_SAME_CHANNEL_PINS;
@@ -775,7 +782,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_DFSDM_FilterRegConvHalfCpltCallback(
+    DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
+  if ((hdfsdm_filter == &hdfsdm1_filter0)) {
+      printf("Data!");
+  //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
+//new_pcm_data_l_a = true;  // ready for 1st half of the buffer
+  }
+}
 /* USER CODE END 4 */
 
 /**
