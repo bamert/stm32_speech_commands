@@ -197,7 +197,7 @@ int post_process(ai_i8* data[])
 void MX_X_CUBE_AI_Init(void)
 {
     /* USER CODE BEGIN 5 */
-  printf("\nTEMPLATE - initialization\n");
+  printf("\n\rTEMPLATE - initialization\n\r");
 
   ai_boostrap(data_activations0);
     /* USER CODE END 5 */
@@ -225,6 +225,7 @@ int i=0;
       if (res == 0){
         res = post_process(data_outs);
         printf("inference complete\n\r");
+        i++;
       }
     } while (res==0);
   }

@@ -16,14 +16,14 @@ def main(checkpoint_path=None):
 
     checkpoint_callback = ModelCheckpoint(
         dirpath='checkpoints/',
-        filename='audio-classifier-{epoch:02d}-{val_loss:.2f}',
+        filename='audio-classifier-{epoch:02d}',
         save_top_k=3,
         monitor='val_loss',
         mode='min',
     )
     steps_per_epoch = len(data_module.train_dataloader())
     trainer = pl.Trainer(
-        max_epochs=10,  # Adjust as needed
+            #max_epochs=10,  # Adjust as needed
         accelerator='gpu' if torch.cuda.is_available() else 'cpu',
         devices=1,
         callbacks=[checkpoint_callback],
