@@ -28,6 +28,8 @@ extern "C" {
 void MX_X_CUBE_AI_Init(void);
 void MX_X_CUBE_AI_Process(void);
 /* USER CODE BEGIN includes */
+static bool model_busy = false;
+int copy_from_dma_buffer_and_convert(uint16_t* buf, int length);
 /* USER CODE END includes */
 #ifdef __cplusplus
 }

@@ -64,6 +64,7 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
+static uint16_t input_buf_l[8000] __attribute__((aligned(2)));
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -131,9 +132,6 @@ int main(void)
   MX_X_CUBE_AI_Init();
   /* USER CODE BEGIN 2 */
 
-  //int32_t input_buf_l[8000] = { 0 };
-//#int16_t *input_buf_l = (int16_t*)malloc(7000 * sizeof(int16_t));
-  uint16_t input_buf_l[8000] __attribute__((aligned(2)));
 
   printf("Attempting init of fdsdm\n\r");
   // Hacky: We HAL_FDSDM_FilterRegularStart_DMA expects pointers to
@@ -782,7 +780,10 @@ static void MX_GPIO_Init(void)
 void HAL_DFSDM_FilterRegConvHalfCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
-      printf("Half Data!\n\r");
+      if (!model_busy) {
+         copy_from_dma_buffer_and_convert(&input_buf_l[0], 4000);
+         printf("Half data and Model not busy\n\r");
+      }
   //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
 //new_pcm_data_l_a = true;  // ready for 1st half of the buffer
   }
@@ -790,7 +791,10 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(
 void HAL_DFSDM_FilterRegConvCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
-      printf("Full Data!\n\r");
+      if (!model_busy) {
+          copy_from_dma_buffer_and_convert(&input_buf_l[4000], 4000);
+          printf("Full Data!\n\r");
+      }
   //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
 //new_pcm_data_l_a = true;  // ready for 1st half of the buffer
   }

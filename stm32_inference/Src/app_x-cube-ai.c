@@ -178,6 +178,13 @@ int acquire_and_process_data(ai_i8* data[])
   }
   return 0;
 }
+int copy_from_dma_buffer_and_convert(uint16_t* buf, int length) {
+  float* float_data = (float*)data_ins[0]; 
+  for (int j = 0; j < length; j++) {
+      float_data[j] = buf[j]; // Convert to float, preserving scale
+  }
+  return 0;
+}
 
 int post_process(ai_i8* data[])
 {
@@ -214,6 +221,11 @@ void MX_X_CUBE_AI_Process(void)
 int i=0;
   if (speech) {
     do {
+     if(model_busy) {
+         // Indicates data is ready
+         // Scala data to N(0,1)
+         // Start inference, process output
+     }
       /* 1 - acquire and pre-process input data */
       res = acquire_and_process_data(data_ins);
       /* 2 - process the data - call inference engine */
