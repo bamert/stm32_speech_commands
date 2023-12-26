@@ -97,6 +97,8 @@ const char* const speech_classes[] = {
     "yes",
     "zero",
 };
+
+static volatile bool model_busy;
 /* USER CODE END includes */
 
 /* IO buffers ----------------------------------------------------------------*/
@@ -208,12 +210,27 @@ static int ai_run(void)
 }
 
 /* USER CODE BEGIN 2 */
-int copy_from_dma_buffer_and_convert(int16_t* buf, int length) {
+int copy_first_half_dma(int16_t* buf, uint32_t length) {
+  if (model_busy){
+        return 1;
+  }
   float* input_ptr = (float*)(ai_input[0].data);
 
-  for (int j = 0; j < length; j++) {
-      input_ptr[j] = (float32_t)buf[j]; // Convert to float, preserving scale
+  for (uint32_t j = 0; j < length; j++) {
+      input_ptr[j] = (float) buf[j];
   }
+  return 0;
+}
+int copy_second_half_dma(int16_t* buf, uint32_t length) {
+  if (model_busy){
+        return 1;
+  }
+  float* input_ptr = (float*)(ai_input[0].data);
+
+  for (uint32_t j = 0; j < length; j++) {
+      input_ptr[4000+j] = (float) buf[j];
+  }
+  start_inference();
   return 0;
 }
 int start_inference(void){
@@ -244,7 +261,7 @@ void run_inference(){
     if (input_ptr == NULL){
         printf("ERROR. input data pointer has not been setup\r\n");
     }
-    standardize_data(&input_ptr[0], 4000);
+    standardize_data(&input_ptr[0], 8000);
     // Run inference
     int res = ai_run();
     /* 3- post-process the predictions */
@@ -282,10 +299,7 @@ int post_process()
    uint32_t maxIndex;
 
     // Find the maximum value and its index
-    //printf("Finding maximum of %i outputs\r\n", AI_SPEECH_OUT_1_SIZE);
     arm_max_f32(outdat, AI_SPEECH_OUT_1_SIZE, &maxValue, &maxIndex);
-    //maxIndex = VectorMaximum(data);
-    //maxValue = data[maxIndex];
     float score = exp(maxValue);
    if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
        printf("Invalid max index\r\n");

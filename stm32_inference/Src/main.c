@@ -143,7 +143,7 @@ int main(void)
       //Use this instead once we don't right shift by 8 bits anymore:
       //Even without the 8bit shift, we can't read 8000 samples here.
       //The length might be in 32bit. Unclear.
-memset(input_buf_l, 0, sizeof(int16_t)*8000);
+    memset(input_buf_l, 0, sizeof(int16_t)*8000);
    if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
     printf("FDSDM Filter 0 failed\n\r");
   }else{
@@ -784,6 +784,13 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+float mean(int16_t* buf, int len){
+    int32_t sum=0;
+    for(int i=0;i<len;i++){
+        sum+=buf[i];
+    }
+    return sum / (float)len;
+}
 void HAL_DFSDM_FilterRegConvHalfCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
@@ -791,10 +798,10 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(
       uint32_t durationFull = current - lastFullAudioFrame;
       uint32_t durationHalf = current - lastHalfAudioFrame;
       lastHalfAudioFrame = current;
-      //printf("Half IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
-      if (!model_busy) {
-         copy_from_dma_buffer_and_convert(&input_buf_l[0], 4000);
-      }
+        //printf("Half IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
+         //float m = mean(&input_buf_l[0], 4000);
+         //printf("First half mean %.2f\r\n", m);
+         copy_first_half_dma(&input_buf_l[0], 4000);
   }
 }
 void HAL_DFSDM_FilterRegConvCpltCallback(
@@ -804,11 +811,11 @@ void HAL_DFSDM_FilterRegConvCpltCallback(
       uint32_t durationFull = current - lastFullAudioFrame;
       uint32_t durationHalf = current - lastHalfAudioFrame;
       lastFullAudioFrame = current;
-      printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
-      if (!model_busy) {
-          copy_from_dma_buffer_and_convert(&input_buf_l[4000], 4000);
-          start_inference();
-      } 
+      //printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
+         //float m = mean(&input_buf_l[4000], 4000);
+         //printf("Second half mean %.2f\r\n", m);
+          copy_second_half_dma(&input_buf_l[4000], 4000);
+          //start_inference();
   }
 }
 /* USER CODE END 4 */
