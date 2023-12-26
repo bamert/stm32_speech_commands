@@ -167,6 +167,8 @@ LIBDIR =  \
 -LMiddlewares/ST/AI/Lib \
 -LDrivers/CMSIS/DSP/Lib/GCC/
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) -Wl,--start-group $(LIBS) -Wl,--end-group -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS += -u _printf_float
+
 
 
 # default action: build all

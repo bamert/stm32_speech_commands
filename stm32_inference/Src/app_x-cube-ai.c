@@ -232,24 +232,7 @@ int start_inference(void){
     model_busy = true;
     return 0;
 }
-void run_inference(){
-    // Do input scaling
-    float* float_data = (float*)data_ins[0]; 
-    standardize_data(float_data, 8000);
-    // Run inference
-    ai_run();
-    printf("Starting inference \n\r");
-    int res = ai_run();
-    /* 3- post-process the predictions */
-    if (res == 0){
-        float* output_data = (float*)data_outs[0]; 
-        res = post_process(output_data);
-        printf("inference complete\n\r");
-    }
-    model_busy = false;
-
-}
-void standardize_data(float* data, uint32_t length) {
+float standardize_data(float* data, uint32_t length) {
     float mean, stddev;
     
     // Calculate the mean
@@ -262,7 +245,26 @@ void standardize_data(float* data, uint32_t length) {
     for (uint32_t i = 0; i < length; i++) {
         data[i] = (data[i] - mean) / stddev;
     }
+    return stddev;
 }
+void run_inference(){
+    // Do input scaling
+    //float* float_data = (float*)data_ins[0]; 
+    float stddev = standardize_data(data_ins[0], 8000);
+    // Run inference
+    ai_run();
+    printf("Starting inference stddev %.02f\n\r", stddev);
+    int res = ai_run();
+    /* 3- post-process the predictions */
+    if (res == 0){
+        float* output_data = (float*)data_outs[0]; 
+        res = post_process(output_data);
+        printf("inference complete\n\r");
+    }
+    model_busy = false;
+
+}
+
 uint32_t VectorMaximum(float* vector){
   ai_float max=-100.;
   uint32_t idx=0;
