@@ -135,14 +135,11 @@ int main(void)
 //#int16_t *input_buf_l = (int16_t*)malloc(7000 * sizeof(int16_t));
   uint16_t input_buf_l[8000] __attribute__((aligned(2)));
 
-  if(input_buf_l == NULL) {
-      printf("Malloc failed\n\r");
-  } else {
-      printf("Malloc succeeded\n\r");
-  }
-
   printf("Attempting init of fdsdm\n\r");
-  if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
+  // Hacky: We HAL_FDSDM_FilterRegularStart_DMA expects pointers to
+  // 32bit arrays and a read length in multiples of 32bit. However,
+  // we configured the DMA to be operating on half-words and read 8000 16bit values to conserve memory.
+  if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 4000 ) != HAL_OK){
     printf("FDSDM Filter 0 failed\n\r");
   }else{
     printf("FDSDM Filter 0 ok\n\r");
@@ -785,7 +782,15 @@ static void MX_GPIO_Init(void)
 void HAL_DFSDM_FilterRegConvHalfCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
-      printf("Data!");
+      printf("Half Data!\n\r");
+  //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
+//new_pcm_data_l_a = true;  // ready for 1st half of the buffer
+  }
+}
+void HAL_DFSDM_FilterRegConvCpltCallback(
+    DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
+  if ((hdfsdm_filter == &hdfsdm1_filter0)) {
+      printf("Full Data!\n\r");
   //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
 //new_pcm_data_l_a = true;  // ready for 1st half of the buffer
   }

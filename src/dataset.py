@@ -57,7 +57,8 @@ class SubsetSC(SPEECHCOMMANDS):
                     os.path.normpath(os.path.join(self._path, line.strip()))
                     for line in fileobj
                 ]
-        self.resample = T.Resample(orig_freq=16000, new_freq=new_sample_rate)
+        self.new_sample_rate=new_sample_rate
+        self.resample = T.Resample(orig_freq=16000, new_freq=self.new_sample_rate)
         self.mean = torch.tensor(-2.7432e-06)
         self.std = torch.tensor(0.7073) 
         # Create a dictionary that maps each unique label to a unique integer
@@ -79,7 +80,7 @@ class SubsetSC(SPEECHCOMMANDS):
         label = item[2]
         waveform = self.resample(waveform)
         # Pad or trim the waveform to a fixed length (e.g., corresponding to 8000 samples)
-        target_length = 8000  # Adjust as needed
+        target_length = self.new_sample_rate # Adjust as needed
         if waveform.size(1) > target_length:
             waveform = waveform[:, :target_length]  # Trim
         elif waveform.size(1) < target_length:
@@ -104,9 +105,10 @@ class AudioDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
-        self.train_set = SubsetSC(subset="training")
-        self.val_set = SubsetSC(subset="validation")
-        self.test_set = SubsetSC(subset="testing")
+        self.new_sample_rate = 8000
+        self.train_set = SubsetSC(subset="training", new_sample_rate=self.new_sample_rate)
+        self.val_set = SubsetSC(subset="validation", new_sample_rate=self.new_sample_rate)
+        self.test_set = SubsetSC(subset="testing", new_sample_rate=self.new_sample_rate)
 
     def setup(self, stage=None):
         pass
