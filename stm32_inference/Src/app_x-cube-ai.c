@@ -230,6 +230,9 @@ int start_inference(void){
     // start the inference
     printf("Setting model busy\n\r");
     model_busy = true;
+    return 0;
+}
+void run_inference(){
     // Do input scaling
     float* float_data = (float*)data_ins[0]; 
     standardize_data(float_data, 8000);
@@ -244,7 +247,7 @@ int start_inference(void){
         printf("inference complete\n\r");
     }
     model_busy = false;
-    return 0;
+
 }
 void standardize_data(float* data, uint32_t length) {
     float mean, stddev;
@@ -327,6 +330,9 @@ void MX_X_CUBE_AI_Process(void)
   if (speech) {
       for(;;){
           // Do nothing. Dma interrupt directly calls start_inference
+          if(model_busy){
+            run_inference();
+          }
       }
   }
 
