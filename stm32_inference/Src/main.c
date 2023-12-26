@@ -65,6 +65,7 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* USER CODE BEGIN PV */
 
 static uint16_t input_buf_l[8000] __attribute__((aligned(2)));
+static uint32_t lastAudioFrame = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -138,6 +139,8 @@ int main(void)
   // 32bit arrays and a read length in multiples of 32bit. However,
   // we configured the DMA to be operating on half-words and read 8000 16bit values to conserve memory.
   if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 4000 ) != HAL_OK){
+      //Use this instead once we don't right shift by 8 bits anymore:
+     //if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
     printf("FDSDM Filter 0 failed\n\r");
   }else{
     printf("FDSDM Filter 0 ok\n\r");
@@ -147,7 +150,7 @@ int main(void)
       / hdfsdm1_filter0.Init.FilterParam.Oversampling
       / hdfsdm1_filter0.Init.FilterParam.IntOversampling;
 
-  printf("f_s:%i\n\r", f_s);
+  printf("audio_sampling_frequence:%i Hz \n\r", f_s);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -276,7 +279,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_filter0.Init.RegularParam.DmaMode = ENABLE;
   hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
   hdfsdm1_filter0.Init.FilterParam.Oversampling = 10;
-  hdfsdm1_filter0.Init.FilterParam.IntOversampling = 10;
+  hdfsdm1_filter0.Init.FilterParam.IntOversampling = 20;
   if (HAL_DFSDM_FilterInit(&hdfsdm1_filter0) != HAL_OK)
   {
     Error_Handler();
@@ -783,22 +786,19 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(
       if (!model_busy) {
          copy_from_dma_buffer_and_convert(&input_buf_l[0], 4000);
       }
-  //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
-//new_pcm_data_l_a = true;  // ready for 1st half of the buffer
   }
 }
 void HAL_DFSDM_FilterRegConvCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
+      uint32_t current = HAL_GetTick();
+      uint32_t duration = current - lastAudioFrame;
+      lastAudioFrame = current;
+      printf("Frame duration %u ms\r\n", duration);
       if (!model_busy) {
           copy_from_dma_buffer_and_convert(&input_buf_l[4000], 4000);
-          printf("Full data received\n\r");
           start_inference();
-      } else {
-          printf("Full Data but model busy!\n\r");
-      }
-  //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
-//new_pcm_data_l_a = true;  // ready for 1st half of the buffer
+      } 
   }
 }
 /* USER CODE END 4 */
