@@ -211,24 +211,19 @@ static int ai_run(void)
 int copy_from_dma_buffer_and_convert(int16_t* buf, int length) {
   float* input_ptr = (float*)(ai_input[0].data);
 
-  int32_t sum=0;
   for (int j = 0; j < length; j++) {
-      sum+=buf[j];
       input_ptr[j] = (float32_t)buf[j]; // Convert to float, preserving scale
   }
-  float mean = sum / ((float)length);
-  printf("Input mean %.2f\r\n", mean);
   return 0;
 }
 int start_inference(void){
     // Set the busy flag. Prevents buffer from being overwritten
     // The process method below will scale the inputs and start inference
     // start the inference
-    printf("Setting model busy\n\r");
     model_busy = true;
     return 0;
 }
-float standardize_data(float* data, uint32_t length) {
+void standardize_data(float* data, uint32_t length) {
     float mean, stddev;
     
     // Calculate the mean
@@ -241,7 +236,7 @@ float standardize_data(float* data, uint32_t length) {
     for (uint32_t i = 0; i < length; i++) {
         data[i] = (data[i] - mean) / stddev;
     }
-    return stddev;
+    printf("Mean: %.5f, Stddev %.5f\r\n", mean, stddev);
 }
 void run_inference(){
     // Do input scaling
@@ -249,14 +244,12 @@ void run_inference(){
     if (input_ptr == NULL){
         printf("ERROR. input data pointer has not been setup\r\n");
     }
-    float stddev = standardize_data(input_ptr, 8000);
+    standardize_data(&input_ptr[0], 4000);
     // Run inference
-    printf("Starting inference stddev %.02f\n\r", stddev);
     int res = ai_run();
     /* 3- post-process the predictions */
     if (res == 0){
         res = post_process();
-        printf("inference complete\n\r");
     }
     model_busy = false;
 
@@ -298,10 +291,10 @@ int post_process()
        printf("Invalid max index\r\n");
        return 0;
    } else if ( score < 0.4){
-       printf("Inference under score threshold: %0.2f.\n\r", score);
+       printf("Inference under score threshold: %0.2f.\n\r\n\r", score);
 
    } else {
-      printf("score: %0.2f, index=%lu, class %s\r\n", score, maxIndex, speech_classes[maxIndex], maxValue);
+      printf("score: %0.2f, index=%lu, class %s\r\n\r\n", score, maxIndex, speech_classes[maxIndex], maxValue);
    }
 
     return 0;

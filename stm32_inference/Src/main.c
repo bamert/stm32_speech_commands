@@ -143,6 +143,7 @@ int main(void)
       //Use this instead once we don't right shift by 8 bits anymore:
       //Even without the 8bit shift, we can't read 8000 samples here.
       //The length might be in 32bit. Unclear.
+memset(input_buf_l, 0, sizeof(int16_t)*8000);
    if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
     printf("FDSDM Filter 0 failed\n\r");
   }else{
