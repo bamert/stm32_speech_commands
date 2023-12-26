@@ -58,6 +58,45 @@
 #include "speech_data.h"
 
 /* USER CODE BEGIN includes */
+#include "arm_math.h"
+const char* const speech_classes[] = {
+    "background_noise_",
+    "backward",
+    "bed",
+    "bird",
+    "cat",
+    "dog",
+    "down",
+    "eight",
+    "five",
+    "follow",
+    "forward",
+    "four",
+    "go",
+    "happy",
+    "house",
+    "learn",
+    "left",
+    "marvin",
+    "nine",
+    "no",
+    "off",
+    "on",
+    "one",
+    "right",
+    "seven",
+    "sheila",
+    "six",
+    "stop",
+    "three",
+    "tree",
+    "two",
+    "up",
+    "visual",
+    "wow",
+    "yes",
+    "zero",
+};
 /* USER CODE END includes */
 
 /* IO buffers ----------------------------------------------------------------*/
@@ -185,8 +224,56 @@ int copy_from_dma_buffer_and_convert(uint16_t* buf, int length) {
   }
   return 0;
 }
+int start_inference(void){
+    // Set the busy flag. Prevents buffer from being overwritten
+    // The process method below will scale the inputs and start inference
+    // start the inference
+    printf("Setting model busy\n\r");
+    model_busy = true;
+    // Do input scaling
+    float* float_data = (float*)data_ins[0]; 
+    standardize_data(float_data, 8000);
+    // Run inference
+    ai_run();
+    printf("Starting inference \n\r");
+    int res = ai_run();
+    /* 3- post-process the predictions */
+    if (res == 0){
+        float* output_data = (float*)data_outs[0]; 
+        res = post_process(output_data);
+        printf("inference complete\n\r");
+    }
+    model_busy = false;
+    return 0;
+}
+void standardize_data(float* data, uint32_t length) {
+    float mean, stddev;
+    
+    // Calculate the mean
+    arm_mean_f32(data, length, &mean);
 
-int post_process(ai_i8* data[])
+    // Calculate the standard deviation
+    arm_std_f32(data, length, &stddev);
+
+    // Standardize the data
+    for (uint32_t i = 0; i < length; i++) {
+        data[i] = (data[i] - mean) / stddev;
+    }
+}
+uint32_t VectorMaximum(float* vector){
+  ai_float max=-100.;
+  uint32_t idx=0;
+  
+  // find maximum output
+  for(int i=0;i<AI_SPEECH_OUT_1_SIZE;i++){
+   if(vector[i] > max){
+     idx=i;
+     max = vector[i];
+   }
+  }
+  return idx;
+}
+int post_process(float* data)
 {
   /* process the predictions
   for (int idx=0; idx < AI_SPEECH_OUT_NUM; idx++ )
@@ -195,7 +282,26 @@ int post_process(ai_i8* data[])
   }
 
   */
-  return 0;
+   float maxValue;
+   uint32_t maxIndex;
+
+    // Find the maximum value and its index
+    //printf("Finding maximum of %i outputs\r\n", AI_SPEECH_OUT_1_SIZE);
+    //arm_max_f32(data, AI_SPEECH_OUT_1_SIZE, &maxValue, &maxIndex);
+    maxIndex = VectorMaximum(data);
+    maxValue = data[maxIndex];
+    uint32_t maxScore = (int)(maxValue * 100);
+   if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
+       printf("Invalid max index\r\n");
+       return 0;
+   } else if ( maxScore < 40){
+       printf("Inference under score threshold: %lu\n\r", maxScore);
+
+   } else {
+      printf("score: %lu, index=%lu, class %s\r\n", maxScore, maxIndex, speech_classes[maxIndex], maxValue);
+   }
+
+    return 0;
 }
 /* USER CODE END 2 */
 
@@ -213,33 +319,15 @@ void MX_X_CUBE_AI_Init(void)
 void MX_X_CUBE_AI_Process(void)
 {
     /* USER CODE BEGIN 6 */
-  int res = -1;
+  int res = 0;
 
   printf("TEMPLATE - run - main loop\n");
 
-//speech = true; // lol this overrode the model, right?
-int i=0;
+  int i=0;
   if (speech) {
-    do {
-     if(model_busy) {
-         // Indicates data is ready
-         // Scala data to N(0,1)
-         // Start inference, process output
-     }
-      /* 1 - acquire and pre-process input data */
-      res = acquire_and_process_data(data_ins);
-      /* 2 - process the data - call inference engine */
-      if (res == 0){
-        printf("Starting inference %i\n\r",i);
-        res = ai_run();
+      for(;;){
+          // Do nothing. Dma interrupt directly calls start_inference
       }
-      /* 3- post-process the predictions */
-      if (res == 0){
-        res = post_process(data_outs);
-        printf("inference complete\n\r");
-        i++;
-      }
-    } while (res==0);
   }
 
   if (res) {

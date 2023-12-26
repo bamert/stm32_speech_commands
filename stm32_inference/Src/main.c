@@ -782,7 +782,6 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
       if (!model_busy) {
          copy_from_dma_buffer_and_convert(&input_buf_l[0], 4000);
-         printf("Half data and Model not busy\n\r");
       }
   //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
 //new_pcm_data_l_a = true;  // ready for 1st half of the buffer
@@ -793,7 +792,10 @@ void HAL_DFSDM_FilterRegConvCpltCallback(
   if ((hdfsdm_filter == &hdfsdm1_filter0)) {
       if (!model_busy) {
           copy_from_dma_buffer_and_convert(&input_buf_l[4000], 4000);
-          printf("Full Data!\n\r");
+          printf("Full data received\n\r");
+          start_inference();
+      } else {
+          printf("Full Data but model busy!\n\r");
       }
   //if (!new_pcm_data_l_a && (hdfsdm_filter == &hdfsdm1_filter0)) {
 //new_pcm_data_l_a = true;  // ready for 1st half of the buffer

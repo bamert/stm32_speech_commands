@@ -136,6 +136,7 @@ C_INCLUDES =  \
 -IDrivers/STM32L4xx_HAL_Driver/Inc \
 -IDrivers/STM32L4xx_HAL_Driver/Inc/Legacy \
 -IDrivers/CMSIS/Device/ST/STM32L4xx/Include \
+-IDrivers/CMSIS/DSP/Include \
 -IDrivers/CMSIS/Include \
 
 
@@ -160,11 +161,13 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = STM32L475VGTx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys  \
+LIBS = -lc -lm -lnosys  -larm_cortexM4lf_math \
 -l:NetworkRuntime810_CM4_GCC.a
 LIBDIR =  \
--LMiddlewares/ST/AI/Lib
+-LMiddlewares/ST/AI/Lib \
+-LDrivers/CMSIS/DSP/Lib/GCC/
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) -Wl,--start-group $(LIBS) -Wl,--end-group -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
