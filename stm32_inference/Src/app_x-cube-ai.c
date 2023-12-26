@@ -208,20 +208,16 @@ static int ai_run(void)
 }
 
 /* USER CODE BEGIN 2 */
-int acquire_and_process_data(ai_i8* data[])
-{
-  /* fill the inputs of the c-model */
-  float* float_data = (float*)data[0]; 
-  for (int j = 0; j < AI_SPEECH_IN_1_SIZE; j++) {
-      float_data[j] = 0.2e-2f; // Fill with float zeros
-  }
-  return 0;
-}
 int copy_from_dma_buffer_and_convert(int16_t* buf, int length) {
-  float* float_data = (float*)data_ins[0]; 
+  float* input_ptr = (float*)(ai_input[0].data);
+
+  int32_t sum=0;
   for (int j = 0; j < length; j++) {
-      float_data[j] = (float)buf[j]; // Convert to float, preserving scale
+      sum+=buf[j];
+      input_ptr[j] = (float32_t)buf[j]; // Convert to float, preserving scale
   }
+  float mean = sum / ((float)length);
+  printf("Input mean %.2f\r\n", mean);
   return 0;
 }
 int start_inference(void){
@@ -249,16 +245,17 @@ float standardize_data(float* data, uint32_t length) {
 }
 void run_inference(){
     // Do input scaling
-    //float* float_data = (float*)data_ins[0]; 
-    float stddev = standardize_data(data_ins[0], 8000);
+    float* input_ptr = (float*)(ai_input[0].data);
+    if (input_ptr == NULL){
+        printf("ERROR. input data pointer has not been setup\r\n");
+    }
+    float stddev = standardize_data(input_ptr, 8000);
     // Run inference
-    ai_run();
     printf("Starting inference stddev %.02f\n\r", stddev);
     int res = ai_run();
     /* 3- post-process the predictions */
     if (res == 0){
-        float* output_data = (float*)data_outs[0]; 
-        res = post_process(output_data);
+        res = post_process();
         printf("inference complete\n\r");
     }
     model_busy = false;
@@ -278,7 +275,7 @@ uint32_t VectorMaximum(float* vector){
   }
   return idx;
 }
-int post_process(float* data)
+int post_process()
 {
   /* process the predictions
   for (int idx=0; idx < AI_SPEECH_OUT_NUM; idx++ )
@@ -287,23 +284,24 @@ int post_process(float* data)
   }
 
   */
+   float* outdat = (float*)(ai_output[0].data);
    float maxValue;
    uint32_t maxIndex;
 
     // Find the maximum value and its index
     //printf("Finding maximum of %i outputs\r\n", AI_SPEECH_OUT_1_SIZE);
-    //arm_max_f32(data, AI_SPEECH_OUT_1_SIZE, &maxValue, &maxIndex);
-    maxIndex = VectorMaximum(data);
-    maxValue = data[maxIndex];
-    uint32_t maxScore = (int)(maxValue * 100);
+    arm_max_f32(outdat, AI_SPEECH_OUT_1_SIZE, &maxValue, &maxIndex);
+    //maxIndex = VectorMaximum(data);
+    //maxValue = data[maxIndex];
+    float score = exp(maxValue);
    if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
        printf("Invalid max index\r\n");
        return 0;
-   } else if ( maxScore < 40){
-       printf("Inference under score threshold: %lu\n\r", maxScore);
+   } else if ( score < 0.4){
+       printf("Inference under score threshold: %0.2f.\n\r", score);
 
    } else {
-      printf("score: %lu, index=%lu, class %s\r\n", maxScore, maxIndex, speech_classes[maxIndex], maxValue);
+      printf("score: %0.2f, index=%lu, class %s\r\n", score, maxIndex, speech_classes[maxIndex], maxValue);
    }
 
     return 0;
