@@ -64,7 +64,7 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
-volatile static uint16_t input_buf_l[8000] __attribute__((aligned(2)));
+volatile static int16_t input_buf_l[8000] __attribute__((aligned(2)));
 volatile static uint32_t lastFullAudioFrame = 0;
 volatile static uint32_t lastHalfAudioFrame = 0;
 /* USER CODE END PV */

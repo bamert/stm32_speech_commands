@@ -217,10 +217,10 @@ int acquire_and_process_data(ai_i8* data[])
   }
   return 0;
 }
-int copy_from_dma_buffer_and_convert(uint16_t* buf, int length) {
+int copy_from_dma_buffer_and_convert(int16_t* buf, int length) {
   float* float_data = (float*)data_ins[0]; 
   for (int j = 0; j < length; j++) {
-      float_data[j] = buf[j]; // Convert to float, preserving scale
+      float_data[j] = (float)buf[j]; // Convert to float, preserving scale
   }
   return 0;
 }
