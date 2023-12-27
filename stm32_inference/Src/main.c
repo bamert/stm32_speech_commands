@@ -64,7 +64,7 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
-volatile static int16_t input_buf_l[8000] __attribute__((aligned(2)));
+volatile static int16_t input_buf_l[8000] __attribute__((aligned(4)));
 volatile static uint32_t lastFullAudioFrame = 0;
 volatile static uint32_t lastHalfAudioFrame = 0;
 /* USER CODE END PV */
@@ -139,12 +139,15 @@ int main(void)
   // Hacky: We HAL_FDSDM_FilterRegularStart_DMA expects pointers to
   // 32bit arrays and a read length in multiples of 32bit. However,
   // we configured the DMA to be operating on half-words and read 8000 16bit values to conserve memory.
-  //if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 4000 ) != HAL_OK){
       //Use this instead once we don't right shift by 8 bits anymore:
       //Even without the 8bit shift, we can't read 8000 samples here.
       //The length might be in 32bit. Unclear.
-    memset(input_buf_l, 0, sizeof(int16_t)*8000);
-   if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
+   //if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
+  // This might help:
+  //https://codebrowser.dev/linux/linux/drivers/iio/adc/stm32-dfsdm-adc.c.html#stm32h7_dfsdm_audio_data
+  //Most promising:
+  //https://github.com/ryankurte/stm32-base/blob/master/drivers/BSP/STM32F769I-Discovery/stm32f769i_discovery_audio.c#L1731
+  if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
     printf("FDSDM Filter 0 failed\n\r");
   }else{
     printf("FDSDM Filter 0 ok\n\r");
@@ -292,8 +295,8 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_filter1.Init.RegularParam.Trigger = DFSDM_FILTER_SW_TRIGGER;
   hdfsdm1_filter1.Init.RegularParam.FastMode = ENABLE;
   hdfsdm1_filter1.Init.RegularParam.DmaMode = ENABLE;
-  hdfsdm1_filter1.Init.FilterParam.SincOrder = DFSDM_FILTER_FASTSINC_ORDER;
-  hdfsdm1_filter1.Init.FilterParam.Oversampling = 1;
+  hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
+  hdfsdm1_filter1.Init.FilterParam.Oversampling = 128;
   hdfsdm1_filter1.Init.FilterParam.IntOversampling = 1;
   if (HAL_DFSDM_FilterInit(&hdfsdm1_filter1) != HAL_OK)
   {
@@ -302,7 +305,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel1.Instance = DFSDM1_Channel1;
   hdfsdm1_channel1.Init.OutputClock.Activation = ENABLE;
   hdfsdm1_channel1.Init.OutputClock.Selection = DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM;
-  hdfsdm1_channel1.Init.OutputClock.Divider = 128;
+  hdfsdm1_channel1.Init.OutputClock.Divider = 80; 
   hdfsdm1_channel1.Init.Input.Multiplexer = DFSDM_CHANNEL_EXTERNAL_INPUTS;
   hdfsdm1_channel1.Init.Input.DataPacking = DFSDM_CHANNEL_STANDARD_MODE;
   hdfsdm1_channel1.Init.Input.Pins = DFSDM_CHANNEL_FOLLOWING_CHANNEL_PINS;
@@ -311,7 +314,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel1.Init.Awd.FilterOrder = DFSDM_CHANNEL_FASTSINC_ORDER;
   hdfsdm1_channel1.Init.Awd.Oversampling = 1;
   hdfsdm1_channel1.Init.Offset = 0;
-  hdfsdm1_channel1.Init.RightBitShift = 0x01;
+  hdfsdm1_channel1.Init.RightBitShift = 0x08;
   if (HAL_DFSDM_ChannelInit(&hdfsdm1_channel1) != HAL_OK)
   {
     Error_Handler();
@@ -319,7 +322,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel2.Instance = DFSDM1_Channel2;
   hdfsdm1_channel2.Init.OutputClock.Activation = ENABLE;
   hdfsdm1_channel2.Init.OutputClock.Selection = DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM;
-  hdfsdm1_channel2.Init.OutputClock.Divider = 128;
+  hdfsdm1_channel2.Init.OutputClock.Divider = 80;
   hdfsdm1_channel2.Init.Input.Multiplexer = DFSDM_CHANNEL_EXTERNAL_INPUTS;
   hdfsdm1_channel2.Init.Input.DataPacking = DFSDM_CHANNEL_STANDARD_MODE;
   hdfsdm1_channel2.Init.Input.Pins = DFSDM_CHANNEL_SAME_CHANNEL_PINS;
@@ -328,7 +331,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel2.Init.Awd.FilterOrder = DFSDM_CHANNEL_FASTSINC_ORDER;
   hdfsdm1_channel2.Init.Awd.Oversampling = 1;
   hdfsdm1_channel2.Init.Offset = 0;
-  hdfsdm1_channel2.Init.RightBitShift = 0x01;
+  hdfsdm1_channel2.Init.RightBitShift = 0x08;
   if (HAL_DFSDM_ChannelInit(&hdfsdm1_channel2) != HAL_OK)
   {
     Error_Handler();
@@ -811,7 +814,7 @@ void HAL_DFSDM_FilterRegConvCpltCallback(
       uint32_t durationFull = current - lastFullAudioFrame;
       uint32_t durationHalf = current - lastHalfAudioFrame;
       lastFullAudioFrame = current;
-      //printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
+      printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
          //float m = mean(&input_buf_l[4000], 4000);
          //printf("Second half mean %.2f\r\n", m);
           copy_second_half_dma(&input_buf_l[4000], 4000);
