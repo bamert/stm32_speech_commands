@@ -43,11 +43,10 @@ class M5(nn.Module):
         x = self.conv4(x)
         x = F.relu(self.bn4(x))
         x = self.pool4(x)
-        # x = F.avg_pool1d(x, x.shape[-1])
         x = self.global_avg_pool(x)
-        x = x.permute(0, 2, 1)
+        x = torch.flatten(x, 1)
         x = self.fc1(x)
-        return F.log_softmax(x, dim=2)
+        return F.log_softmax(x, dim=1)
 
 
 class AudioClassifier(pl.LightningModule):
