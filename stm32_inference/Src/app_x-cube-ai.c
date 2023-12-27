@@ -261,7 +261,10 @@ void run_inference(){
     }
     standardize_data(&input_ptr[0], 8000);
     // Run inference
+    uint32_t start = HAL_GetTick();
     int res = ai_run();
+    uint32_t end = HAL_GetTick();
+    printf("Inference time %ums\r\n", end-start);
     /* 3- post-process the predictions */
     if (res == 0){
         res = post_process();

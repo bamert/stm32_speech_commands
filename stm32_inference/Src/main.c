@@ -824,7 +824,7 @@ void HAL_DFSDM_FilterRegConvCpltCallback(
       uint32_t durationHalf = current - lastHalfAudioFrame;
       lastFullAudioFrame = current;
       //printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
-         int16_t a = amplitude(&input_buf_l[4000], 4000);
+         //int16_t a = amplitude(&input_buf_l[4000], 4000);
          //float m = mean(&input_buf_l[4000], 4000);
          //printf("Second half mean %.2f\r\n", m);
           double_buffer_chunk(&input_buf_l[4000], 4000);
