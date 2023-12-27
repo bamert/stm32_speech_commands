@@ -39,7 +39,7 @@ def main(checkpoint_path=None, sample_rate_hz:int=4000):
     )
     steps_per_epoch = len(data_module.train_dataloader())
     trainer = pl.Trainer(
-            #max_epochs=10,  # Adjust as needed
+            max_epochs=12,  # Adjust as needed
         accelerator='gpu' if torch.cuda.is_available() else 'cpu',
         devices=1,
         callbacks=[checkpoint_callback],
@@ -54,4 +54,4 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint', type=str, help='Path to a checkpoint to resume training', default=None)
     args = parser.parse_args()
 
-    main(args.checkpoint, sample_rate_hz=4000)
+    main(args.checkpoint, sample_rate_hz=8000)
