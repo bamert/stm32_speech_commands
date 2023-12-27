@@ -676,7 +676,7 @@ STMicroelectronics.X-CUBE-AI.8.1.0.ModelCompression-5024f5ebc0015fcbfd030fa10bb3
 STMicroelectronics.X-CUBE-AI.8.1.0.ModelFlashOccupation-5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96=137104
 STMicroelectronics.X-CUBE-AI.8.1.0.ModelHashList=5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96
 STMicroelectronics.X-CUBE-AI.8.1.0.ModelKind-5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96=ONNX
-STMicroelectronics.X-CUBE-AI.8.1.0.ModelMacc-5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96=1925196
+STMicroelectronics.X-CUBE-AI.8.1.0.ModelMacc-5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96=1925160
 STMicroelectronics.X-CUBE-AI.8.1.0.ModelName-5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96=speech
 STMicroelectronics.X-CUBE-AI.8.1.0.ModelNameList=speech
 STMicroelectronics.X-CUBE-AI.8.1.0.ModelRamOccupation-5024f5ebc0015fcbfd030fa10bb32df04086baa16817f095d9bf21b7321e0f96=64056

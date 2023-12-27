@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    speech.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    Wed Dec 27 14:51:19 2023
+  * @date    Wed Dec 27 17:57:29 2023
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -65,13 +65,12 @@ AI_DEPRECATED
   AI_SPEECH_OUT_1_SIZE_BYTES, \
 }
 #define AI_SPEECH_OUT_1_FORMAT      AI_BUFFER_FORMAT_FLOAT
-#define AI_SPEECH_OUT_1_HEIGHT      (36)
-#define AI_SPEECH_OUT_1_CHANNEL     (1)
-#define AI_SPEECH_OUT_1_SIZE        (36 * 1)
+#define AI_SPEECH_OUT_1_CHANNEL     (36)
+#define AI_SPEECH_OUT_1_SIZE        (36)
 #define AI_SPEECH_OUT_1_SIZE_BYTES  (144)
 
 /******************************************************************************/
-#define AI_SPEECH_N_NODES (19)
+#define AI_SPEECH_N_NODES (16)
 
 
 AI_API_DECLARE_BEGIN
