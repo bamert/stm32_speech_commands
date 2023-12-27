@@ -100,12 +100,12 @@ class SubsetSC(SPEECHCOMMANDS):
 
 
 class AudioDataModule(LightningDataModule):
-    def __init__(self, batch_size, num_workers, pin_memory):
+    def __init__(self, batch_size, num_workers, pin_memory, sample_rate_hz:int=8000):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
-        self.new_sample_rate = 4000
+        self.new_sample_rate = sample_rate_hz
         self.train_set = SubsetSC(subset="training", new_sample_rate=self.new_sample_rate)
         self.val_set = SubsetSC(subset="validation", new_sample_rate=self.new_sample_rate)
         self.test_set = SubsetSC(subset="testing", new_sample_rate=self.new_sample_rate)
