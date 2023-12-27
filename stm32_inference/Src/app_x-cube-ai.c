@@ -246,11 +246,12 @@ void standardize_data(float* data, uint32_t length) {
     // Calculate the standard deviation
     arm_std_f32(data, length, &stddev);
 
+    //printf("Mean: %.5f, Stddev %.5f\r\n", mean, stddev);
     // Standardize the data
+    // mean 32, stddev 16 for rightbitshift 3 in 16bit data works.
     for (uint32_t i = 0; i < length; i++) {
         data[i] = (data[i] - mean) / stddev;
     }
-    printf("Mean: %.5f, Stddev %.5f\r\n", mean, stddev);
 }
 void run_inference(){
     // Do input scaling
@@ -302,10 +303,9 @@ int post_process()
        printf("Invalid max index\r\n");
        return 0;
    } else if ( score < 0.7){
-       printf("Inference under score threshold: %0.2f.\n\r\n\r", score);
-
+       //printf("((score: %0.2f, class %s))\r\n\r\n", score, speech_classes[maxIndex]);
    } else {
-      printf("score: %0.2f, index=%lu, class %s\r\n\r\n", score, maxIndex, speech_classes[maxIndex], maxValue);
+      printf(">>>score: %0.2f, class %s\r\n\r\n", score, speech_classes[maxIndex]);
    }
 
     return 0;
