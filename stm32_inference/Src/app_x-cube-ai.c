@@ -237,7 +237,7 @@ int start_inference(void){
     model_busy = true;
     return 0;
 }
-void standardize_data(float* data, uint32_t length) {
+float standardize_data(float* data, uint32_t length) {
     float mean, stddev;
     
     // Calculate the mean
@@ -252,6 +252,7 @@ void standardize_data(float* data, uint32_t length) {
     for (uint32_t i = 0; i < length; i++) {
         data[i] = (data[i] - mean) / stddev;
     }
+    return stddev;
 }
 void run_inference(){
     // Do input scaling
@@ -259,12 +260,12 @@ void run_inference(){
     if (input_ptr == NULL){
         printf("ERROR. input data pointer has not been setup\r\n");
     }
-    standardize_data(&input_ptr[0], 8000);
+    float stddev = standardize_data(&input_ptr[0], 8000);
     // Run inference
     uint32_t start = HAL_GetTick();
     int res = ai_run();
     uint32_t end = HAL_GetTick();
-    printf("Inference time %ums\r\n", end-start);
+    printf("Inference time %ums. Stddev %f\r\n", end-start, stddev);
     /* 3- post-process the predictions */
     if (res == 0){
         res = post_process();
