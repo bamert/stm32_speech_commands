@@ -24,7 +24,7 @@ def export_onnx_model(model, audio_dim, path):
                   dynamic_axes={'input' : {0 : 'batch_size'},    # variable length axes
                                 'output' : {0 : 'batch_size'}})
 
-def main(checkpoint_path=None, sample_rate_hz:int=4000):
+def main(checkpoint_path=None, sample_rate_hz:int=8000):
     data_module = AudioDataModule(batch_size=256, num_workers=4, pin_memory=True, sample_rate_hz=sample_rate_hz)
     num_labels = data_module.num_classes()
     model = AudioClassifier(num_labels=num_labels)

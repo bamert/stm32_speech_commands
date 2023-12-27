@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    speech.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    Wed Dec 27 11:23:37 2023
+  * @date    Wed Dec 27 14:51:19 2023
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -25,7 +25,7 @@
 
 /******************************************************************************/
 #define AI_SPEECH_MODEL_NAME          "speech"
-#define AI_SPEECH_ORIGIN_MODEL_NAME   "model"
+#define AI_SPEECH_ORIGIN_MODEL_NAME   "model_onnx_8000hz"
 
 /******************************************************************************/
 #define AI_SPEECH_ACTIVATIONS_ALIGNMENT   (4)

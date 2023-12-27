@@ -13,7 +13,7 @@ class M5(nn.Module):
     2017 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 
     New Orleans, LA, USA, 2017, pp. 421-425, doi: 10.1109/ICASSP.2017.7952190.
     """
-    def __init__(self, n_input=1, n_output=35, stride=8, n_channel=32):
+    def __init__(self, n_input=1, n_output=35, stride=16, n_channel=32):
         super().__init__()
         self.conv1 = nn.Conv1d(n_input, n_channel, kernel_size=80, stride=stride)
         self.bn1 = nn.BatchNorm1d(n_channel)
