@@ -261,6 +261,12 @@ void run_inference(){
         printf("ERROR. input data pointer has not been setup\r\n");
     }
     float stddev = standardize_data(&input_ptr[0], 8000);
+    if (stddev < 30){
+        // Avoids scaling background noise up too much
+        // This threshold is experimental and intended
+        model_busy = false;
+        return;
+    }
     // Run inference
     uint32_t start = HAL_GetTick();
     int res = ai_run();
