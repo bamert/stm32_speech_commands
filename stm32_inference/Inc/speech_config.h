@@ -3,7 +3,7 @@
   ******************************************************************************
   * @file    speech_config.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    Tue Dec 26 15:26:49 2023
+  * @date    Wed Dec 27 11:23:37 2023
   * @brief   AI Tool Automatic Code Generator for Custom Layers Implementation
   ******************************************************************************
   * @attention
