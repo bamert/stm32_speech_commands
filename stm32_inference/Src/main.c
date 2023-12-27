@@ -147,7 +147,7 @@ int main(void)
   //https://codebrowser.dev/linux/linux/drivers/iio/adc/stm32-dfsdm-adc.c.html#stm32h7_dfsdm_audio_data
   //Most promising:
   //https://github.com/ryankurte/stm32-base/blob/master/drivers/BSP/STM32F769I-Discovery/stm32f769i_discovery_audio.c#L1731
-  if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, input_buf_l , 8000 ) != HAL_OK){
+  if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter1, input_buf_l , 8000 ) != HAL_OK){
     printf("FDSDM Filter 0 failed\n\r");
   }else{
     printf("FDSDM Filter 0 ok\n\r");
@@ -285,8 +285,8 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_filter0.Init.RegularParam.FastMode = ENABLE;
   hdfsdm1_filter0.Init.RegularParam.DmaMode = ENABLE;
   hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
-  hdfsdm1_filter0.Init.FilterParam.Oversampling = 128;
-  hdfsdm1_filter0.Init.FilterParam.IntOversampling = 1;
+  hdfsdm1_filter0.Init.FilterParam.Oversampling = 125;
+  hdfsdm1_filter0.Init.FilterParam.IntOversampling = 4;
   if (HAL_DFSDM_FilterInit(&hdfsdm1_filter0) != HAL_OK)
   {
     Error_Handler();
@@ -296,8 +296,8 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_filter1.Init.RegularParam.FastMode = ENABLE;
   hdfsdm1_filter1.Init.RegularParam.DmaMode = ENABLE;
   hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
-  hdfsdm1_filter1.Init.FilterParam.Oversampling = 128;
-  hdfsdm1_filter1.Init.FilterParam.IntOversampling = 1;
+  hdfsdm1_filter1.Init.FilterParam.Oversampling = 125;
+  hdfsdm1_filter1.Init.FilterParam.IntOversampling = 4;
   if (HAL_DFSDM_FilterInit(&hdfsdm1_filter1) != HAL_OK)
   {
     Error_Handler();
@@ -309,12 +309,12 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel1.Init.Input.Multiplexer = DFSDM_CHANNEL_EXTERNAL_INPUTS;
   hdfsdm1_channel1.Init.Input.DataPacking = DFSDM_CHANNEL_STANDARD_MODE;
   hdfsdm1_channel1.Init.Input.Pins = DFSDM_CHANNEL_FOLLOWING_CHANNEL_PINS;
-  hdfsdm1_channel1.Init.SerialInterface.Type = DFSDM_CHANNEL_SPI_RISING;
+  hdfsdm1_channel1.Init.SerialInterface.Type = DFSDM_CHANNEL_SPI_FALLING;
   hdfsdm1_channel1.Init.SerialInterface.SpiClock = DFSDM_CHANNEL_SPI_CLOCK_INTERNAL;
   hdfsdm1_channel1.Init.Awd.FilterOrder = DFSDM_CHANNEL_FASTSINC_ORDER;
   hdfsdm1_channel1.Init.Awd.Oversampling = 1;
-  hdfsdm1_channel1.Init.Offset = 0;
-  hdfsdm1_channel1.Init.RightBitShift = 0x08;
+  hdfsdm1_channel1.Init.Offset = 32768;
+  hdfsdm1_channel1.Init.RightBitShift = 0x0F; //11bits shift (24bit->16bit, 3bit channel information)
   if (HAL_DFSDM_ChannelInit(&hdfsdm1_channel1) != HAL_OK)
   {
     Error_Handler();
@@ -322,7 +322,7 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel2.Instance = DFSDM1_Channel2;
   hdfsdm1_channel2.Init.OutputClock.Activation = ENABLE;
   hdfsdm1_channel2.Init.OutputClock.Selection = DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM;
-  hdfsdm1_channel2.Init.OutputClock.Divider = 80;
+  hdfsdm1_channel2.Init.OutputClock.Divider = 20;
   hdfsdm1_channel2.Init.Input.Multiplexer = DFSDM_CHANNEL_EXTERNAL_INPUTS;
   hdfsdm1_channel2.Init.Input.DataPacking = DFSDM_CHANNEL_STANDARD_MODE;
   hdfsdm1_channel2.Init.Input.Pins = DFSDM_CHANNEL_SAME_CHANNEL_PINS;
@@ -330,8 +330,8 @@ static void MX_DFSDM1_Init(void)
   hdfsdm1_channel2.Init.SerialInterface.SpiClock = DFSDM_CHANNEL_SPI_CLOCK_INTERNAL;
   hdfsdm1_channel2.Init.Awd.FilterOrder = DFSDM_CHANNEL_FASTSINC_ORDER;
   hdfsdm1_channel2.Init.Awd.Oversampling = 1;
-  hdfsdm1_channel2.Init.Offset = 0;
-  hdfsdm1_channel2.Init.RightBitShift = 0x08;
+  hdfsdm1_channel2.Init.Offset = 32768;
+  hdfsdm1_channel2.Init.RightBitShift = 0x0F; //11bits shift (24bit->16bit data, 3bit channel information)
   if (HAL_DFSDM_ChannelInit(&hdfsdm1_channel2) != HAL_OK)
   {
     Error_Handler();
@@ -794,9 +794,18 @@ float mean(int16_t* buf, int len){
     }
     return sum / (float)len;
 }
+int16_t amplitude(int16_t* buf, int len){
+    int16_t maxamp=0;
+    for(int i=0;i<len;i++){
+        if(abs(buf[i]) > maxamp){
+            maxamp = abs(buf[i]);
+        }
+    }
+    return maxamp;
+}
 void HAL_DFSDM_FilterRegConvHalfCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
-  if ((hdfsdm_filter == &hdfsdm1_filter0)) {
+  if ((hdfsdm_filter == &hdfsdm1_filter1)) {
       uint32_t current = HAL_GetTick();
       uint32_t durationFull = current - lastFullAudioFrame;
       uint32_t durationHalf = current - lastHalfAudioFrame;
@@ -809,16 +818,17 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(
 }
 void HAL_DFSDM_FilterRegConvCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
-  if ((hdfsdm_filter == &hdfsdm1_filter0)) {
+  if ((hdfsdm_filter == &hdfsdm1_filter1)) {
       uint32_t current = HAL_GetTick();
       uint32_t durationFull = current - lastFullAudioFrame;
       uint32_t durationHalf = current - lastHalfAudioFrame;
       lastFullAudioFrame = current;
-      printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
+      //printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
+         int16_t a = amplitude(&input_buf_l[4000], 4000);
+         printf("Second half maxamp %hd\r\n", a);
          //float m = mean(&input_buf_l[4000], 4000);
          //printf("Second half mean %.2f\r\n", m);
           copy_second_half_dma(&input_buf_l[4000], 4000);
-          //start_inference();
   }
 }
 /* USER CODE END 4 */

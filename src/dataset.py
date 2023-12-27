@@ -105,7 +105,7 @@ class AudioDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
-        self.new_sample_rate = 8000
+        self.new_sample_rate = 4000
         self.train_set = SubsetSC(subset="training", new_sample_rate=self.new_sample_rate)
         self.val_set = SubsetSC(subset="validation", new_sample_rate=self.new_sample_rate)
         self.test_set = SubsetSC(subset="testing", new_sample_rate=self.new_sample_rate)
