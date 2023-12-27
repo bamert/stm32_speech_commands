@@ -28,8 +28,7 @@ extern "C" {
 void MX_X_CUBE_AI_Init(void);
 void MX_X_CUBE_AI_Process(void);
 /* USER CODE BEGIN includes */
-int copy_first_half_dma(int16_t* buf, uint32_t length);
-int copy_second_half_dma(int16_t* buf, uint32_t length);
+int double_buffer_chunk(int16_t* buf, uint32_t length);
 int start_inference();
 extern const char* const speech_classes[];
 /* USER CODE END includes */

@@ -99,6 +99,8 @@ const char* const speech_classes[] = {
 };
 
 static volatile bool model_busy;
+
+static volatile int write_offset=0;
 /* USER CODE END includes */
 
 /* IO buffers ----------------------------------------------------------------*/
@@ -210,28 +212,23 @@ static int ai_run(void)
 }
 
 /* USER CODE BEGIN 2 */
-int copy_first_half_dma(int16_t* buf, uint32_t length) {
+int double_buffer_chunk(int16_t* buf, uint32_t length) {
   if (model_busy){
+      // Ignore new data while inference is running
         return 1;
   }
   float* input_ptr = (float*)(ai_input[0].data);
 
   for (uint32_t j = 0; j < length; j++) {
-      input_ptr[j] = (float) buf[j];
+      input_ptr[write_offset+j] = (float) buf[j];
+  }
+  write_offset+= length;
+  if (write_offset==AI_SPEECH_IN_1_SIZE){
+      write_offset=0;
+      start_inference();
   }
   return 0;
-}
-int copy_second_half_dma(int16_t* buf, uint32_t length) {
-  if (model_busy){
-        return 1;
-  }
-  float* input_ptr = (float*)(ai_input[0].data);
 
-  for (uint32_t j = 0; j < length; j++) {
-      input_ptr[4000+j] = (float) buf[j];
-  }
-  start_inference();
-  return 0;
 }
 int start_inference(void){
     // Set the busy flag. Prevents buffer from being overwritten
@@ -304,7 +301,7 @@ int post_process()
    if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
        printf("Invalid max index\r\n");
        return 0;
-   } else if ( score < 0.4){
+   } else if ( score < 0.7){
        printf("Inference under score threshold: %0.2f.\n\r\n\r", score);
 
    } else {

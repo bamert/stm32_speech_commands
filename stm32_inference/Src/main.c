@@ -813,7 +813,7 @@ void HAL_DFSDM_FilterRegConvHalfCpltCallback(
         //printf("Half IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
          //float m = mean(&input_buf_l[0], 4000);
          //printf("First half mean %.2f\r\n", m);
-         copy_first_half_dma(&input_buf_l[0], 4000);
+         double_buffer_chunk(&input_buf_l[0], 4000);
   }
 }
 void HAL_DFSDM_FilterRegConvCpltCallback(
@@ -825,10 +825,9 @@ void HAL_DFSDM_FilterRegConvCpltCallback(
       lastFullAudioFrame = current;
       //printf("Full IRQ. Since last full %u ms. Since last half: %u\r\n", durationFull, durationHalf);
          int16_t a = amplitude(&input_buf_l[4000], 4000);
-         printf("Second half maxamp %hd\r\n", a);
          //float m = mean(&input_buf_l[4000], 4000);
          //printf("Second half mean %.2f\r\n", m);
-          copy_second_half_dma(&input_buf_l[4000], 4000);
+          double_buffer_chunk(&input_buf_l[4000], 4000);
   }
 }
 /* USER CODE END 4 */
