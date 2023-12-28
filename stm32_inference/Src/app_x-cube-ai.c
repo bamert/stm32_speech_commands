@@ -102,6 +102,7 @@ static volatile bool model_busy;
 volatile static uint32_t lastChunkTime = 0;
 
 static volatile int write_offset=0;
+static volatile bool buffer_filled=false;
 /* USER CODE END includes */
 
 /* IO buffers ----------------------------------------------------------------*/
@@ -221,16 +222,25 @@ int double_buffer_chunk(int16_t* buf, uint32_t length) {
  
   if (model_busy){
       // Ignore new data while inference is running
-        return 1;
+      printf("New data ignored due to slow inferene\r\n");
+      return 1;
   }
   float* input_ptr = (float*)(ai_input[0].data);
 
+  // Shift old data back
+  //
+  if(buffer_filled){
+    memmove(input_ptr, input_ptr + 2000, 6000 * sizeof(float));
+  }
+  // Copy new data
   for (uint32_t j = 0; j < length; j++) {
       input_ptr[write_offset+j] = (float) buf[j];
   }
   write_offset+= length;
   if (write_offset==AI_SPEECH_IN_1_SIZE){
-      write_offset=0;
+      buffer_filled=true;
+      // Next we write into the "most recent chunk"
+      write_offset=AI_SPEECH_IN_1_SIZE-length;
       start_inference();
   }
   return 0;
