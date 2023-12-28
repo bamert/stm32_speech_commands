@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    speech.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    Wed Dec 27 18:16:44 2023
+  * @date    Thu Dec 28 09:21:05 2023
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -35,14 +35,14 @@
 #define AI_NET_OBJ_INSTANCE g_speech
  
 #undef AI_SPEECH_MODEL_SIGNATURE
-#define AI_SPEECH_MODEL_SIGNATURE     "8d94f14a6d4b795fbf261d912dd48d23"
+#define AI_SPEECH_MODEL_SIGNATURE     "ba7356b389e3f9905bcfd062bc059d08"
 
 #ifndef AI_TOOLS_REVISION_ID
 #define AI_TOOLS_REVISION_ID     ""
 #endif
 
 #undef AI_TOOLS_DATE_TIME
-#define AI_TOOLS_DATE_TIME   "Wed Dec 27 18:16:44 2023"
+#define AI_TOOLS_DATE_TIME   "Thu Dec 28 09:21:05 2023"
 
 #undef AI_TOOLS_COMPILE_TIME
 #define AI_TOOLS_COMPILE_TIME    __DATE__ " " __TIME__
@@ -95,7 +95,7 @@ AI_ARRAY_OBJ_DECLARE(
 /* Array#9 */
 AI_ARRAY_OBJ_DECLARE(
   _model_conv1_Conv_output_0_weights_array, AI_ARRAY_FORMAT_FLOAT,
-  NULL, NULL, 2560, AI_STATIC)
+  NULL, NULL, 640, AI_STATIC)
 /* Array#10 */
 AI_ARRAY_OBJ_DECLARE(
   _model_conv1_Conv_output_0_bias_array, AI_ARRAY_FORMAT_FLOAT,
@@ -139,11 +139,11 @@ AI_ARRAY_OBJ_DECLARE(
 /* Array#20 */
 AI_ARRAY_OBJ_DECLARE(
   _model_conv1_Conv_output_0_output_array, AI_ARRAY_FORMAT_FLOAT,
-  NULL, NULL, 15872, AI_STATIC)
+  NULL, NULL, 15968, AI_STATIC)
 /* Array#21 */
 AI_ARRAY_OBJ_DECLARE(
   _model_Relu_output_0_output_array, AI_ARRAY_FORMAT_FLOAT,
-  NULL, NULL, 15872, AI_STATIC)
+  NULL, NULL, 15968, AI_STATIC)
 /* Array#22 */
 AI_ARRAY_OBJ_DECLARE(
   _model_pool1_MaxPool_output_0_output_array, AI_ARRAY_FORMAT_FLOAT,
@@ -232,7 +232,7 @@ AI_TENSOR_OBJ_DECLARE(
 AI_TENSOR_OBJ_DECLARE(
   _model_conv1_Conv_output_0_weights, AI_STATIC,
   9, 0x0,
-  AI_SHAPE_INIT(4, 1, 1, 80, 32), AI_STRIDE_INIT(4, 4, 4, 128, 128),
+  AI_SHAPE_INIT(4, 1, 1, 20, 32), AI_STRIDE_INIT(4, 4, 4, 128, 128),
   1, &_model_conv1_Conv_output_0_weights_array, NULL)
 
 /* Tensor #10 */
@@ -309,14 +309,14 @@ AI_TENSOR_OBJ_DECLARE(
 AI_TENSOR_OBJ_DECLARE(
   _model_conv1_Conv_output_0_output, AI_STATIC,
   20, 0x0,
-  AI_SHAPE_INIT(4, 1, 32, 1, 496), AI_STRIDE_INIT(4, 4, 4, 128, 128),
+  AI_SHAPE_INIT(4, 1, 32, 1, 499), AI_STRIDE_INIT(4, 4, 4, 128, 128),
   1, &_model_conv1_Conv_output_0_output_array, NULL)
 
 /* Tensor #21 */
 AI_TENSOR_OBJ_DECLARE(
   _model_Relu_output_0_output, AI_STATIC,
   21, 0x0,
-  AI_SHAPE_INIT(4, 1, 32, 1, 496), AI_STRIDE_INIT(4, 4, 4, 128, 128),
+  AI_SHAPE_INIT(4, 1, 32, 1, 499), AI_STRIDE_INIT(4, 4, 4, 128, 128),
   1, &_model_Relu_output_0_output_array, NULL)
 
 /* Tensor #22 */
@@ -666,11 +666,11 @@ AI_LAYER_OBJ_DECLARE(
 AI_NETWORK_OBJ_DECLARE(
   AI_NET_OBJ_INSTANCE, AI_STATIC,
   AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
-    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 106384, 1, 1),
-    106384, NULL, NULL),
+    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 98704, 1, 1),
+    98704, NULL, NULL),
   AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
-    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 64056, 1, 1),
-    64056, NULL, NULL),
+    AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 64200, 1, 1),
+    64200, NULL, NULL),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_SPEECH_IN_NUM, &input_output),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_SPEECH_OUT_NUM, &output_output),
   &_model_conv1_Conv_output_0_layer, 0, NULL)
@@ -682,14 +682,14 @@ AI_NETWORK_OBJ_DECLARE(
   AI_BUFFER_ARRAY_OBJ_INIT_STATIC(
   	AI_FLAG_NONE, 1,
     AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
-      AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 106384, 1, 1),
-      106384, NULL, NULL)
+      AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 98704, 1, 1),
+      98704, NULL, NULL)
   ),
   AI_BUFFER_ARRAY_OBJ_INIT_STATIC(
   	AI_FLAG_NONE, 1,
     AI_BUFFER_INIT(AI_FLAG_NONE,  AI_BUFFER_FORMAT_U8,
-      AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 64056, 1, 1),
-      64056, NULL, NULL)
+      AI_BUFFER_SHAPE_INIT(AI_SHAPE_BCWH, 4, 1, 64200, 1, 1),
+      64200, NULL, NULL)
   ),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_SPEECH_IN_NUM, &input_output),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_SPEECH_OUT_NUM, &output_output),
@@ -708,8 +708,8 @@ ai_bool speech_configure_activations(
   if (ai_platform_get_activations_map(g_speech_activations_map, 1, params)) {
     /* Updating activations (byte) offsets */
     
-    input_output_array.data = AI_PTR(g_speech_activations_map[0] + 32056);
-    input_output_array.data_start = AI_PTR(g_speech_activations_map[0] + 32056);
+    input_output_array.data = AI_PTR(g_speech_activations_map[0] + 32200);
+    input_output_array.data_start = AI_PTR(g_speech_activations_map[0] + 32200);
     
     _model_conv1_Conv_output_0_output_array.data = AI_PTR(g_speech_activations_map[0] + 0);
     _model_conv1_Conv_output_0_output_array.data_start = AI_PTR(g_speech_activations_map[0] + 0);
@@ -782,40 +782,40 @@ ai_bool speech_configure_weights(
     _model_conv1_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 0);
     
     _model_conv1_Conv_output_0_bias_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv1_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 10240);
-    _model_conv1_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 10240);
+    _model_conv1_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 2560);
+    _model_conv1_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 2560);
     
     _model_conv2_Conv_output_0_weights_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv2_Conv_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 10368);
-    _model_conv2_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 10368);
+    _model_conv2_Conv_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 2688);
+    _model_conv2_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 2688);
     
     _model_conv2_Conv_output_0_bias_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv2_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 22656);
-    _model_conv2_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 22656);
+    _model_conv2_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 14976);
+    _model_conv2_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 14976);
     
     _model_conv3_Conv_output_0_weights_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv3_Conv_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 22784);
-    _model_conv3_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 22784);
+    _model_conv3_Conv_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 15104);
+    _model_conv3_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 15104);
     
     _model_conv3_Conv_output_0_bias_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv3_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 47360);
-    _model_conv3_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 47360);
+    _model_conv3_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 39680);
+    _model_conv3_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 39680);
     
     _model_conv4_Conv_output_0_weights_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv4_Conv_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 47616);
-    _model_conv4_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 47616);
+    _model_conv4_Conv_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 39936);
+    _model_conv4_Conv_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 39936);
     
     _model_conv4_Conv_output_0_bias_array.format |= AI_FMT_FLAG_CONST;
-    _model_conv4_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 96768);
-    _model_conv4_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 96768);
+    _model_conv4_Conv_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 89088);
+    _model_conv4_Conv_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 89088);
     
     _model_fc1_Gemm_output_0_weights_array.format |= AI_FMT_FLAG_CONST;
-    _model_fc1_Gemm_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 97024);
-    _model_fc1_Gemm_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 97024);
+    _model_fc1_Gemm_output_0_weights_array.data = AI_PTR(g_speech_weights_map[0] + 89344);
+    _model_fc1_Gemm_output_0_weights_array.data_start = AI_PTR(g_speech_weights_map[0] + 89344);
     
     _model_fc1_Gemm_output_0_bias_array.format |= AI_FMT_FLAG_CONST;
-    _model_fc1_Gemm_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 106240);
-    _model_fc1_Gemm_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 106240);
+    _model_fc1_Gemm_output_0_bias_array.data = AI_PTR(g_speech_weights_map[0] + 98560);
+    _model_fc1_Gemm_output_0_bias_array.data_start = AI_PTR(g_speech_weights_map[0] + 98560);
     
     return true;
   }
@@ -854,7 +854,7 @@ ai_bool ai_speech_get_info(
       .api_version            = ai_platform_api_get_version(),
       .interface_api_version  = ai_platform_interface_api_get_version(),
       
-      .n_macc            = 1925160,
+      .n_macc            = 974856,
       .n_inputs          = 0,
       .inputs            = NULL,
       .n_outputs         = 0,
@@ -900,7 +900,7 @@ ai_bool ai_speech_get_report(
       .api_version            = ai_platform_api_get_version(),
       .interface_api_version  = ai_platform_interface_api_get_version(),
       
-      .n_macc            = 1925160,
+      .n_macc            = 974856,
       .n_inputs          = 0,
       .inputs            = NULL,
       .n_outputs         = 0,

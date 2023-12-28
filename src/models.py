@@ -13,9 +13,9 @@ class M5(nn.Module):
     2017 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 
     New Orleans, LA, USA, 2017, pp. 421-425, doi: 10.1109/ICASSP.2017.7952190.
     """
-    def __init__(self, n_input=1, n_output=35, stride=16, n_channel=32):
+    def __init__(self, n_input=1, n_output=35, stride=16, kernel_size=80, n_channel=32):
         super().__init__()
-        self.conv1 = nn.Conv1d(n_input, n_channel, kernel_size=80, stride=stride)
+        self.conv1 = nn.Conv1d(n_input, n_channel, kernel_size=kernel_size, stride=stride)
         self.bn1 = nn.BatchNorm1d(n_channel)
         self.pool1 = nn.MaxPool1d(4)
         self.conv2 = nn.Conv1d(n_channel, n_channel, kernel_size=3)
@@ -90,7 +90,7 @@ class AudioClassifier(pl.LightningModule):
         super().__init__()
         self.val_correct_outputs = 0
         self.val_total_outputs = 0
-        self.model = M4(n_input=1, n_output=num_labels, use_pool3=True)
+        self.model = M5(n_input=1, n_output=num_labels, kernel_size=20)
 
     def forward(self, x):
         return self.model(x)

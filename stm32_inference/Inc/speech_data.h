@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    speech_data.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    Wed Dec 27 18:16:44 2023
+  * @date    Thu Dec 28 09:21:05 2023
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * Copyright (c) 2023 STMicroelectronics.
@@ -33,7 +33,7 @@ AI_DEPRECATED
 AI_API_DECLARE_BEGIN
 
 
-extern const ai_u64 s_speech_weights_array_u64[13298];
+extern const ai_u64 s_speech_weights_array_u64[12338];
 
 
 

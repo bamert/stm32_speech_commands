@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    speech_data_params.h
   * @author  AST Embedded Analytics Research Platform
-  * @date    Wed Dec 27 18:16:44 2023
+  * @date    Thu Dec 28 09:21:05 2023
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * Copyright (c) 2023 STMicroelectronics.
@@ -29,18 +29,18 @@
 
 
 #define AI_SPEECH_DATA_ACTIVATIONS_SIZES \
-  { 64056, }
-#define AI_SPEECH_DATA_ACTIVATIONS_SIZE     (64056)
+  { 64200, }
+#define AI_SPEECH_DATA_ACTIVATIONS_SIZE     (64200)
 #define AI_SPEECH_DATA_ACTIVATIONS_COUNT    (1)
-#define AI_SPEECH_DATA_ACTIVATION_1_SIZE    (64056)
+#define AI_SPEECH_DATA_ACTIVATION_1_SIZE    (64200)
 
 
 
 #define AI_SPEECH_DATA_WEIGHTS_SIZES \
-  { 106384, }
-#define AI_SPEECH_DATA_WEIGHTS_SIZE         (106384)
+  { 98704, }
+#define AI_SPEECH_DATA_WEIGHTS_SIZE         (98704)
 #define AI_SPEECH_DATA_WEIGHTS_COUNT        (1)
-#define AI_SPEECH_DATA_WEIGHT_1_SIZE        (106384)
+#define AI_SPEECH_DATA_WEIGHT_1_SIZE        (98704)
 
 
 
