@@ -99,6 +99,7 @@ const char* const speech_classes[] = {
 };
 
 static volatile bool model_busy;
+volatile static uint32_t lastChunkTime = 0;
 
 static volatile int write_offset=0;
 /* USER CODE END includes */
@@ -213,6 +214,11 @@ static int ai_run(void)
 
 /* USER CODE BEGIN 2 */
 int double_buffer_chunk(int16_t* buf, uint32_t length) {
+  uint32_t current = HAL_GetTick();
+  uint32_t chunkDuration = current - lastChunkTime;
+  lastChunkTime = current;
+  printf("Last Audio Chunk %u ms ago \r\n", chunkDuration);
+ 
   if (model_busy){
       // Ignore new data while inference is running
         return 1;
@@ -295,13 +301,6 @@ uint32_t VectorMaximum(float* vector){
 }
 int post_process()
 {
-  /* process the predictions
-  for (int idx=0; idx < AI_SPEECH_OUT_NUM; idx++ )
-  {
-      data[idx] = ....
-  }
-
-  */
    float* outdat = (float*)(ai_output[0].data);
    float maxValue;
    uint32_t maxIndex;
