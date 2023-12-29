@@ -90,7 +90,7 @@ class AudioClassifier(pl.LightningModule):
         super().__init__()
         self.val_correct_outputs = 0
         self.val_total_outputs = 0
-        self.model = M5(n_input=1, n_output=num_labels, kernel_size=20)
+        self.model = M5(n_input=1, n_output=num_labels, kernel_size=10)
 
     def forward(self, x):
         return self.model(x)

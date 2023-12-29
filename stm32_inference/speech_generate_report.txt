@@ -1,32 +1,32 @@
 Neural Network Tools for STM32 family v1.7.0 (stm.ai v8.1.0-19520)
-Created date          : 2023-12-28 09:21:05
-Parameters            : generate --name speech -m /home/nb/repos/speech_commands/model_onnx_8000hz.onnx --type onnx --compression none --verbosity 1 --workspace /tmp/mxAI_workspace21245106414269117337806854250558601 --output /home/nb/.stm32cubemx/speech_output --allocate-inputs --series stm32l4 --allocate-outputs
+Created date          : 2023-12-28 17:38:46
+Parameters            : generate --name speech -m /home/nb/repos/speech_commands/model_onnx_8000hz.onnx --type onnx --compression none --verbosity 1 --workspace /tmp/mxAI_workspace2423117852300459300231814031228344 --output /home/nb/.stm32cubemx/speech_output --allocate-inputs --series stm32l4 --allocate-outputs
 
 Exec/report summary (generate)
---------------------------------------------------------------------------------
-model file         :   /home/nb/repos/speech_commands/model_onnx_8000hz.onnx    
-type               :   onnx                                                     
-c_name             :   speech                                                   
-compression        :   none                                                     
-options            :   allocate-inputs, allocate-outputs                        
-optimization       :   balanced                                                 
-target/series      :   stm32l4                                                  
-workspace dir      :   /tmp/mxAI_workspace21245106414269117337806854250558601   
-output dir         :   /home/nb/.stm32cubemx/speech_output                      
-model_fmt          :   float                                                    
-model_name         :   model_onnx_8000hz                                        
-model_hash         :   ba7356b389e3f9905bcfd062bc059d08                         
-params #           :   24,676 items (96.39 KiB)                                 
---------------------------------------------------------------------------------
-input 1/1          :   'input' (domain:activations/**default**)                 
-                   :   8000 items, 31.25 KiB, ai_float, float, (1,8000,1)       
-output 1/1         :   'output' (domain:activations/**default**)                
-                   :   36 items, 144 B, ai_float, float, (1,36)                 
-macc               :   974,856                                                  
-weights (ro)       :   98,704 B (96.39 KiB) (1 segment)                         
-activations (rw)   :   64,200 B (62.70 KiB) (1 segment) *                       
-ram (total)        :   64,200 B (62.70 KiB) = 64,200 + 0 + 0                    
---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+model file         :   /home/nb/repos/speech_commands/model_onnx_8000hz.onnx   
+type               :   onnx                                                    
+c_name             :   speech                                                  
+compression        :   none                                                    
+options            :   allocate-inputs, allocate-outputs                       
+optimization       :   balanced                                                
+target/series      :   stm32l4                                                 
+workspace dir      :   /tmp/mxAI_workspace2423117852300459300231814031228344   
+output dir         :   /home/nb/.stm32cubemx/speech_output                     
+model_fmt          :   float                                                   
+model_name         :   model_onnx_8000hz                                       
+model_hash         :   11f6a564cf0fa41c29aaf24072483781                        
+params #           :   24,356 items (95.14 KiB)                                
+-------------------------------------------------------------------------------
+input 1/1          :   'input' (domain:activations/**default**)                
+                   :   8000 items, 31.25 KiB, ai_float, float, (1,8000,1)      
+output 1/1         :   'output' (domain:activations/**default**)               
+                   :   36 items, 144 B, ai_float, float, (1,36)                
+macc               :   818,760                                                 
+weights (ro)       :   97,424 B (95.14 KiB) (1 segment)                        
+activations (rw)   :   64,288 B (62.78 KiB) (1 segment) *                      
+ram (total)        :   64,288 B (62.78 KiB) = 64,288 + 0 + 0                   
+-------------------------------------------------------------------------------
 (*) 'input'/'output' buffers can be used from the activations buffer
 
 Model name - model_onnx_8000hz ['input'] ['output']
@@ -38,15 +38,15 @@ m_id   layer (type,original)                                                    
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
 0      input (Input, )                                                               [b:1,h:8000,h:8000,c:1]                                                                                   |                                   
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
-1      _model_conv1_Conv_output_0 (Conv2D, Conv)                                     [b:1,h:499,h:499,c:32]    672/2,688         319,392                                               input   |                                   conv2d_of32[0]   
+1      _model_conv1_Conv_output_0 (Conv2D, Conv)                                     [b:1,h:500,h:500,c:32]    352/1,408         160,032                                               input   |                                   conv2d_of32[0]   
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
-2      _model_Relu_output_0 (Nonlinearity, Relu)                                     [b:1,h:499,h:499,c:32]                       15,968                          _model_conv1_Conv_output_0   |                                   nl_of32[1]       
+2      _model_Relu_output_0 (Nonlinearity, Relu)                                     [b:1,h:500,h:500,c:32]                       16,000                          _model_conv1_Conv_output_0   |                                   nl_of32[1]       
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
-3      _model_pool1_MaxPool_output_0 (Pool, MaxPool)                                 [b:1,h:124,h:124,c:32]                       15,872                                _model_Relu_output_0   |                                   pool_of32[2]     
+3      _model_pool1_MaxPool_output_0 (Pool, MaxPool)                                 [b:1,h:125,h:125,c:32]                       16,000                                _model_Relu_output_0   |                                   pool_of32[2]     
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
-4      _model_conv2_Conv_output_0 (Conv2D, Conv)                                     [b:1,h:122,h:122,c:32]    3,104/12,416      374,816                       _model_pool1_MaxPool_output_0   |                                   conv2d_of32[3]   
+4      _model_conv2_Conv_output_0 (Conv2D, Conv)                                     [b:1,h:123,h:123,c:32]    3,104/12,416      377,888                       _model_pool1_MaxPool_output_0   |                                   conv2d_of32[3]   
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
-5      _model_Relu_1_output_0 (Nonlinearity, Relu)                                   [b:1,h:122,h:122,c:32]                        3,904                          _model_conv2_Conv_output_0   |                                   nl_of32[4]       
+5      _model_Relu_1_output_0 (Nonlinearity, Relu)                                   [b:1,h:123,h:123,c:32]                        3,936                          _model_conv2_Conv_output_0   |                                   nl_of32[4]       
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
 6      _model_pool2_MaxPool_output_0 (Pool, MaxPool)                                 [b:1,h:30,h:30,c:32]                          3,840                              _model_Relu_1_output_0   |                                   pool_of32[5]     
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
@@ -74,7 +74,7 @@ m_id   layer (type,original)                                                    
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
 17     output (Nonlinearity, LogSoftmax)                                             [b:1,c:36]                                      360                                      output_softmax   |                                   nl_of32[o][15]   
 ------ ----------------------------------------------------------------------------- ------------------------- --------------- --------- --------------------------------------------------- --- --------------- ----------------- ---------------- 
-model/c-model: macc=974,856/974,856  weights=98,704/98,704  activations=--/64,200 io=--/0
+model/c-model: macc=818,760/818,760  weights=97,424/97,424  activations=--/64,288 io=--/0
 
 
 
@@ -84,9 +84,9 @@ model name            : model_onnx_8000hz
 c-name                : speech
 c-node #              : 16
 c-array #             : 27
-activations size      : 64200 (1 segment)
-weights size          : 98704 (1 segment)
-macc                  : 974856
+activations size      : 64288 (1 segment)
+weights size          : 97424 (1 segment)
+macc                  : 818760
 inputs                : ['input_output']
 outputs               : ['output_output']
 
@@ -103,7 +103,7 @@ c_id   name (*_array)                                             item/size     
 6      _model_fc1_Gemm_output_0_output                            36/144        activations/**default**   float         float32             
 7      output_softmax_output                                      36/144        activations/**default**   float         float32             
 8      output_output                                              36/144        activations/**default**   float         float32   /output   
-9      _model_conv1_Conv_output_0_weights                         640/2560      weights/weights           const float   float32             
+9      _model_conv1_Conv_output_0_weights                         320/1280      weights/weights           const float   float32             
 10     _model_conv1_Conv_output_0_bias                            32/128        weights/weights           const float   float32             
 11     _model_conv2_Conv_output_0_weights                         3072/12288    weights/weights           const float   float32             
 12     _model_conv2_Conv_output_0_bias                            32/128        weights/weights           const float   float32             
@@ -114,11 +114,11 @@ c_id   name (*_array)                                             item/size     
 17     _model_fc1_Gemm_output_0_weights                           2304/9216     weights/weights           const float   float32             
 18     _model_fc1_Gemm_output_0_bias                              36/144        weights/weights           const float   float32             
 19     input_output                                               8000/32000    activations/**default**   float         float32   /input    
-20     _model_conv1_Conv_output_0_output                          15968/63872   activations/**default**   float         float32             
-21     _model_Relu_output_0_output                                15968/63872   activations/**default**   float         float32             
-22     _model_pool1_MaxPool_output_0_output                       3968/15872    activations/**default**   float         float32             
-23     _model_conv2_Conv_output_0_output                          3904/15616    activations/**default**   float         float32             
-24     _model_Relu_1_output_0_output                              3904/15616    activations/**default**   float         float32             
+20     _model_conv1_Conv_output_0_output                          16000/64000   activations/**default**   float         float32             
+21     _model_Relu_output_0_output                                16000/64000   activations/**default**   float         float32             
+22     _model_pool1_MaxPool_output_0_output                       4000/16000    activations/**default**   float         float32             
+23     _model_conv2_Conv_output_0_output                          3936/15744    activations/**default**   float         float32             
+24     _model_Relu_1_output_0_output                              3936/15744    activations/**default**   float         float32             
 25     _model_pool2_MaxPool_output_0_output                       960/3840      activations/**default**   float         float32             
 26     _model_conv3_Conv_output_0_output                          1792/7168     activations/**default**   float         float32             
 ------ ---------------------------------------------------------- ------------- ------------------------- ------------- --------- --------- 
@@ -127,26 +127,26 @@ C-Layers (16)
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
 c_id   name (*_layer)                                      id   layer_type   macc     rom     tensors                                                       shape (array id)   
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
-0      _model_conv1_Conv_output_0                          1    conv2d       319392   2688    I: input_output                                               (1,8000,1) (19)    
-                                                                                              W: _model_conv1_Conv_output_0_weights                         (1,20,1,32) (9)    
+0      _model_conv1_Conv_output_0                          1    conv2d       160032   1408    I: input_output                                               (1,8000,1) (19)    
+                                                                                              W: _model_conv1_Conv_output_0_weights                         (1,10,1,32) (9)    
                                                                                               W: _model_conv1_Conv_output_0_bias                            (32,) (10)         
-                                                                                              O: _model_conv1_Conv_output_0_output                          (1,499,32) (20)    
+                                                                                              O: _model_conv1_Conv_output_0_output                          (1,500,32) (20)    
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
-1      _model_Relu_output_0                                2    nl           15968    0       I: _model_conv1_Conv_output_0_output                          (1,499,32) (20)    
-                                                                                              O: _model_Relu_output_0_output                                (1,499,32) (21)    
+1      _model_Relu_output_0                                2    nl           16000    0       I: _model_conv1_Conv_output_0_output                          (1,500,32) (20)    
+                                                                                              O: _model_Relu_output_0_output                                (1,500,32) (21)    
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
-2      _model_pool1_MaxPool_output_0                       3    pool         15872    0       I: _model_Relu_output_0_output                                (1,499,32) (21)    
-                                                                                              O: _model_pool1_MaxPool_output_0_output                       (1,124,32) (22)    
+2      _model_pool1_MaxPool_output_0                       3    pool         16000    0       I: _model_Relu_output_0_output                                (1,500,32) (21)    
+                                                                                              O: _model_pool1_MaxPool_output_0_output                       (1,125,32) (22)    
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
-3      _model_conv2_Conv_output_0                          4    conv2d       374816   12416   I: _model_pool1_MaxPool_output_0_output                       (1,124,32) (22)    
+3      _model_conv2_Conv_output_0                          4    conv2d       377888   12416   I: _model_pool1_MaxPool_output_0_output                       (1,125,32) (22)    
                                                                                               W: _model_conv2_Conv_output_0_weights                         (32,3,1,32) (11)   
                                                                                               W: _model_conv2_Conv_output_0_bias                            (32,) (12)         
-                                                                                              O: _model_conv2_Conv_output_0_output                          (1,122,32) (23)    
+                                                                                              O: _model_conv2_Conv_output_0_output                          (1,123,32) (23)    
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
-4      _model_Relu_1_output_0                              5    nl           3904     0       I: _model_conv2_Conv_output_0_output                          (1,122,32) (23)    
-                                                                                              O: _model_Relu_1_output_0_output                              (1,122,32) (24)    
+4      _model_Relu_1_output_0                              5    nl           3936     0       I: _model_conv2_Conv_output_0_output                          (1,123,32) (23)    
+                                                                                              O: _model_Relu_1_output_0_output                              (1,123,32) (24)    
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
-5      _model_pool2_MaxPool_output_0                       6    pool         3840     0       I: _model_Relu_1_output_0_output                              (1,122,32) (24)    
+5      _model_pool2_MaxPool_output_0                       6    pool         3840     0       I: _model_Relu_1_output_0_output                              (1,123,32) (24)    
                                                                                               O: _model_pool2_MaxPool_output_0_output                       (1,30,32) (25)     
 ------ --------------------------------------------------- ---- ------------ -------- ------- ------------------------------------------------------------- ------------------ 
 6      _model_conv3_Conv_output_0                          7    conv2d       172096   24832   I: _model_pool2_MaxPool_output_0_output                       (1,30,32) (25)     
@@ -192,11 +192,11 @@ Number of operations per c-layer
 ------- ------ ---------------------------------------------------------- --------- -------------- -------- ---------- 
 c_id    m_id   name (type)                                                      #op           type   #param   sparsity 
 ------- ------ ---------------------------------------------------------- --------- -------------- -------- ---------- 
-0       1      _model_conv1_Conv_output_0 (conv2d)                          319,392   smul_f32_f32      672     0.0000 
-1       2      _model_Relu_output_0 (nl)                                     15,968     op_f32_f32          
-2       3      _model_pool1_MaxPool_output_0 (pool)                          15,872     op_f32_f32          
-3       4      _model_conv2_Conv_output_0 (conv2d)                          374,816   smul_f32_f32    3,104     0.0000 
-4       5      _model_Relu_1_output_0 (nl)                                    3,904     op_f32_f32          
+0       1      _model_conv1_Conv_output_0 (conv2d)                          160,032   smul_f32_f32      352     0.0000 
+1       2      _model_Relu_output_0 (nl)                                     16,000     op_f32_f32          
+2       3      _model_pool1_MaxPool_output_0 (pool)                          16,000     op_f32_f32          
+3       4      _model_conv2_Conv_output_0 (conv2d)                          377,888   smul_f32_f32    3,104     0.0000 
+4       5      _model_Relu_1_output_0 (nl)                                    3,936     op_f32_f32          
 5       6      _model_pool2_MaxPool_output_0 (pool)                           3,840     op_f32_f32          
 6       7      _model_conv3_Conv_output_0 (conv2d)                          172,096   smul_f32_f32    6,208     0.0000 
 7       8      _model_Relu_2_output_0 (nl)                                    1,792     op_f32_f32          
@@ -209,37 +209,37 @@ c_id    m_id   name (type)                                                      
 14      16     output_softmax (nl)                                              540     op_f32_f32          
 15      17     output (nl)                                                      360     op_f32_f32          
 ------- ------ ---------------------------------------------------------- --------- -------------- -------- ---------- 
-total                                                                       974,856                  24,676     0.0000 
+total                                                                       818,760                  24,356     0.0000 
 
 Number of operation types
 ---------------- --------- ----------- 
 operation type           #           % 
 ---------------- --------- ----------- 
-smul_f32_f32       930,148       95.4% 
-op_f32_f32          44,708        4.6% 
+smul_f32_f32       773,860       94.5% 
+op_f32_f32          44,900        5.5% 
 
 Complexity report (model)
 ------ --------------------------------------------------- ------------------------- ------------------------- ------ 
 m_id   name                                                c_macc                    c_rom                     c_id   
 ------ --------------------------------------------------- ------------------------- ------------------------- ------ 
-15     model_fc1_weight                                    |                  0.2%   |||                9.5%   [13]   
-1      _model_conv1_Conv_output_0                          |||||||||||||     32.8%   |                  2.7%   [0]    
-2      _model_Relu_output_0                                |                  1.6%   |                  0.0%   [1]    
-3      _model_pool1_MaxPool_output_0                       |                  1.6%   |                  0.0%   [2]    
-4      _model_conv2_Conv_output_0                          ||||||||||||||||  38.4%   ||||              12.6%   [3]    
-5      _model_Relu_1_output_0                              |                  0.4%   |                  0.0%   [4]    
-6      _model_pool2_MaxPool_output_0                       |                  0.4%   |                  0.0%   [5]    
-7      _model_conv3_Conv_output_0                          |||||||           17.7%   ||||||||          25.2%   [6]    
+15     model_fc1_weight                                    |                  0.3%   |||                9.6%   [13]   
+1      _model_conv1_Conv_output_0                          |||||||           19.5%   |                  1.4%   [0]    
+2      _model_Relu_output_0                                |                  2.0%   |                  0.0%   [1]    
+3      _model_pool1_MaxPool_output_0                       |                  2.0%   |                  0.0%   [2]    
+4      _model_conv2_Conv_output_0                          ||||||||||||||||  46.2%   ||||              12.7%   [3]    
+5      _model_Relu_1_output_0                              |                  0.5%   |                  0.0%   [4]    
+6      _model_pool2_MaxPool_output_0                       |                  0.5%   |                  0.0%   [5]    
+7      _model_conv3_Conv_output_0                          |||||||           21.0%   ||||||||          25.5%   [6]    
 8      _model_Relu_2_output_0                              |                  0.2%   |                  0.0%   [7]    
 9      _model_pool3_MaxPool_output_0                       |                  0.2%   |                  0.0%   [8]    
-10     _model_conv4_Conv_output_0                          |||                6.3%   ||||||||||||||||  50.1%   [9]    
+10     _model_conv4_Conv_output_0                          |||                7.5%   ||||||||||||||||  50.7%   [9]    
 11     _model_Relu_3_output_0                              |                  0.0%   |                  0.0%   [10]   
 12     _model_pool4_MaxPool_output_0                       |                  0.0%   |                  0.0%   [11]   
 13     _model_global_avg_pool_GlobalAveragePool_output_0   |                  0.0%   |                  0.0%   [12]   
 16     output_softmax                                      |                  0.1%   |                  0.0%   [14]   
 17     output                                              |                  0.0%   |                  0.0%   [15]   
 ------ --------------------------------------------------- ------------------------- ------------------------- ------ 
-macc=974,856 weights=98,704 act=64,200 ram_io=0
+macc=818,760 weights=97,424 act=64,288 ram_io=0
 
 Generated files (7)
 ---------------------------------------------------------- 
