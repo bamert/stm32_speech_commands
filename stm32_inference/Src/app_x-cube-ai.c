@@ -102,7 +102,13 @@ static volatile bool model_busy;
 volatile static uint32_t lastChunkTime = 0;
 
 static volatile int write_offset=0;
+static volatile int read_offset=0;
 static volatile bool buffer_filled=false;
+#define RINGBUFFER_SIZE AI_SPEECH_IN_1_SIZE
+#define INFERENCE_PERIOD RINGBUFFER_SIZE / 4
+static volatile int num_samples_until_inference=RINGBUFFER_SIZE; 
+volatile static int16_t ringbuffer[RINGBUFFER_SIZE] __attribute__((aligned(4)));
+int post_process(int inference_time, float volume_stddev);
 /* USER CODE END includes */
 
 /* IO buffers ----------------------------------------------------------------*/
@@ -218,30 +224,54 @@ int double_buffer_chunk(int16_t* buf, uint32_t length) {
   uint32_t current = HAL_GetTick();
   uint32_t chunkDuration = current - lastChunkTime;
   lastChunkTime = current;
-  printf("Last Audio Chunk %u ms ago \r\n", chunkDuration);
+  //printf("Last Audio Chunk %u ms ago. This chunk %u elements \r\n", chunkDuration, length);
  
-  if (model_busy){
-      // Ignore new data while inference is running
-      printf("New data ignored due to slow inferene\r\n");
+  
+  if (RINGBUFFER_SIZE % length != 0) {
+      printf("Chunk size needs to be multiple of ringbuffer size\r\n");
       return 1;
   }
-  float* input_ptr = (float*)(ai_input[0].data);
-
-  // Shift old data back
-  //
-  if(buffer_filled){
-    memmove(input_ptr, input_ptr + 2000, 6000 * sizeof(float));
+  if (num_samples_until_inference % length != 0) {
+      printf("Chunk size needs to be multiple of num_samples_until_inference\r\n");
+      return 1;
   }
-  // Copy new data
-  for (uint32_t j = 0; j < length; j++) {
-      input_ptr[write_offset+j] = (float) buf[j];
+  // Copy new contents into write offset
+  memcpy(&ringbuffer[write_offset], buf, length * sizeof(int16_t));
+  // Advance write pointer
+  write_offset += length;
+  if (write_offset == RINGBUFFER_SIZE) {
+      write_offset = 0;
+      //buffer_filled=true;
   }
-  write_offset+= length;
-  if (write_offset==AI_SPEECH_IN_1_SIZE){
-      buffer_filled=true;
-      // Next we write into the "most recent chunk"
-      write_offset=AI_SPEECH_IN_1_SIZE-length;
-      start_inference();
+  //printf("write_offset %u\r\n", write_offset);
+  num_samples_until_inference-=length;
+  // Once buffer filled for the first time, start doing overlapping
+  // inferences on arrival of each 2000 elements (~250ms of audio).
+  if (num_samples_until_inference == 0) {
+    int length_1 = RINGBUFFER_SIZE-read_offset;
+    int length_2 = RINGBUFFER_SIZE-length_1;
+    // Copy first segment to target & convert to float
+    float* target_ptr = (float*)(ai_input[0].data);
+    for (uint32_t j = 0; j < length_1; j++) {
+          target_ptr[j] = (float) ringbuffer[read_offset+j];
+    }
+    // Copy second segment (with wraparound) to target & convert to float
+    for (uint32_t j = 0; j < length_2; j++) {
+          target_ptr[length_1+j] = (float) ringbuffer[j];
+    }
+    // Advance readoffset by 
+    //printf("inference from read_offset %u\r\n", read_offset);
+    read_offset+= INFERENCE_PERIOD; 
+    num_samples_until_inference = INFERENCE_PERIOD;
+    if (model_busy){
+          // Ignore new data while inference is running
+          printf("New data ignored due to slow inference\r\n");
+          return 1;
+    }
+    start_inference();
+  }
+  if (read_offset == RINGBUFFER_SIZE) {
+      read_offset = 0;
   }
   return 0;
 
@@ -276,8 +306,8 @@ void run_inference(){
     if (input_ptr == NULL){
         printf("ERROR. input data pointer has not been setup\r\n");
     }
-    float stddev = standardize_data(&input_ptr[0], 8000);
-    if (stddev < 30){
+    float volume_stddev = standardize_data(&input_ptr[0], 8000);
+    if (volume_stddev < 40){
         // Avoids scaling background noise up too much
         // This threshold is experimental and intended
         model_busy = false;
@@ -286,11 +316,10 @@ void run_inference(){
     // Run inference
     uint32_t start = HAL_GetTick();
     int res = ai_run();
-    uint32_t end = HAL_GetTick();
-    printf("Inference time %ums. Stddev %f\r\n", end-start, stddev);
+    int inference_time_ms = HAL_GetTick() - start;
     /* 3- post-process the predictions */
     if (res == 0){
-        res = post_process();
+        res = post_process(inference_time_ms, volume_stddev);
     }
     model_busy = false;
 
@@ -309,7 +338,7 @@ uint32_t VectorMaximum(float* vector){
   }
   return idx;
 }
-int post_process()
+int post_process(int inference_time, float volume_stddev)
 {
    float* outdat = (float*)(ai_output[0].data);
    float maxValue;
@@ -324,7 +353,7 @@ int post_process()
    } else if ( score < 0.7){
        //printf("((score: %0.2f, class %s))\r\n\r\n", score, speech_classes[maxIndex]);
    } else {
-      printf(">>>score: %0.2f, class %s\r\n\r\n", score, speech_classes[maxIndex]);
+      printf("Prediction: class %s, score %0.2f, volume stddev %0.2f, inference time %u ms\r\n", speech_classes[maxIndex], score, volume_stddev, inference_time);
    }
 
     return 0;
@@ -349,7 +378,6 @@ void MX_X_CUBE_AI_Process(void)
 
   printf("TEMPLATE - run - main loop\n");
 
-  int i=0;
   if (speech) {
       for(;;){
           // Do nothing. Dma interrupt directly calls start_inference

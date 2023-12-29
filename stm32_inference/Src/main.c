@@ -63,8 +63,9 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
-
-volatile static int16_t input_buf_l[4000] __attribute__((aligned(4)));
+#define DMA_CHUNK_SIZE 2000
+#define DMA_HALF_CHUNK_SIZE DMA_CHUNK_SIZE/2
+volatile static int16_t input_buf_l[DMA_CHUNK_SIZE] __attribute__((aligned(4)));
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -140,7 +141,7 @@ int main(void)
       //Use this instead once we don't right shift by 8 bits anymore:
       //Even without the 8bit shift, we can't read 8000 samples here.
       //The length might be in 32bit. Unclear.
-  if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter1, input_buf_l , 4000 ) != HAL_OK){
+  if (HAL_DFSDM_FilterRegularMsbStart_DMA(&hdfsdm1_filter1, input_buf_l , DMA_CHUNK_SIZE ) != HAL_OK){
   // This might help:
   //https://codebrowser.dev/linux/linux/drivers/iio/adc/stm32-dfsdm-adc.c.html#stm32h7_dfsdm_audio_data
   //Most promising:
@@ -804,13 +805,13 @@ int16_t amplitude(int16_t* buf, int len){
 void HAL_DFSDM_FilterRegConvHalfCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter1)) {
-    double_buffer_chunk(&input_buf_l[0], 2000);
+    double_buffer_chunk(&input_buf_l[0], DMA_HALF_CHUNK_SIZE);
   }
 }
 void HAL_DFSDM_FilterRegConvCpltCallback(
     DFSDM_Filter_HandleTypeDef *hdfsdm_filter) {
   if ((hdfsdm_filter == &hdfsdm1_filter1)) {
-    double_buffer_chunk(&input_buf_l[2000], 2000);
+    double_buffer_chunk(&input_buf_l[DMA_HALF_CHUNK_SIZE], DMA_HALF_CHUNK_SIZE);
   }
 }
 /* USER CODE END 4 */
