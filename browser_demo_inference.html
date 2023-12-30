@@ -2,16 +2,23 @@
 <html>
 
 <head>
-    <title>ONNX Runtime Web Example</title>
+    <title>Speech Commands Inference</title>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.9.0/dist/ort.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 
 <body>
-    <h1>ONNX Runtime Web Example</h1>
+    <h1>Speech Commands Inference</h1>
     <select id="input-device"></select>
-    <button id="startRecordingButton">Start Recording</button>
+    <br><button id="startRecordingButton">Start Listening</button>
+    <p>
+    Say one of the following words to update the class prediction probabilities.
+    This model uses 1.6M FLOPs (0.8M multiply-accumulate) and 60K ram for inference.
+    One forward pass runs in 180ms on an STM32L4 device @ 80MHz.
+    </p>
+    <div id="probabilities"></div>
     <br>
-    <textarea id="model-output" rows=30 cols=50></textarea>
     <script>
         let bufferSize = 8192;
         let sampleRate = 8000;
@@ -60,20 +67,16 @@
             'zero']
 
 
-        function appendTextarea(line) {
-            let textarea = document.getElementById('model-output');
-            textarea.value += line + '\r\n';
-        }
         async function loadModel() {
             session = await ort.InferenceSession.create(modelUrl);
-            appendTextarea('Model loaded');
+            console.log(zeroProbs());
+            renderProbabilities(zeroProbs());
         }
 
         loadModel();
 
         function onTimerElapsed(samples) {
             if (!session) {
-                appendTextarea('Model is not loaded yet');
                 return;
             }
 
@@ -90,30 +93,41 @@
                 // Convert outputData to softmax probabilities
                 let probs = data.map(value => Math.exp(value)); //softmax(outputData);
                 let largestIndex = probs.indexOf(Math.max(...probs));
+                let probsWithClassNames = probs.map((prob, index) => ({
+                    'name':SC_CLASSES[index],
+                    'prob':prob
+                }));
 
                 // Sort probabilities in descending order to find the highest and second highest
-                probs.sort((a, b) => b - a);
-
-                let highestProb = probs[0];
-                let secondHighestProb = probs[1];
-
-                // Calculate confidence
-                let confidence = highestProb - secondHighestProb;
-
-                // Get prediction names
-                let predName = SC_CLASSES[largestIndex];
-
-                // Use output data here
-                if (confidence > 0.75) {
-                    appendTextarea('Confidence:' + confidence + ', Prediction:' + predName);
-                }
+                probsWithClassNames.sort((a, b) => b['prob'] - a['prob']);
+                renderProbabilities(probsWithClassNames);
             });
+        }
+        function zeroProbs(){
+            return SC_CLASSES.map((name, index) => ({
+                    'name':name,
+                    'prob': index === 0 ? 1.0 : 0.
+            }));
+        }
+        function renderProbabilities(probs){
+            let certaintyMargin = probs[0]['prob'] - probs[1]['prob'];
+            if (certaintyMargin < 0.75) {
+                // Only redraw when a single class had a clear maximum
+                return;
+            }
+            const probabilities = document.getElementById('probabilities');
+            probabilities.innerHTML = "<ul>";
+            for (prob of probs) {
+                probabilities.innerHTML += "<li>" + prob['name'] + " " + prob['prob'].toFixed(2) + "</li>";
+            }
+            probabilities.innerHTML += "</ul>";
+
         }
         startRecordingButton.onclick = function () {
             const chosenDevice = document.getElementById('input-device');
             const chosenDeviceId = chosenDevice.value;
             const chosenDeviceName = chosenDevice.options[chosenDevice.selectedIndex].text;
-            appendTextarea("Listening on " + chosenDeviceName);
+            startRecordingButton.textContent = "Listening on " + chosenDeviceName;
             navigator.mediaDevices.getUserMedia({
                 audio: {
                     deviceId: chosenDeviceId
