@@ -7,4 +7,3 @@ stm32_inference/build/*
 *.ckpt
 *.tar.gz
 src/__pycache__
-model.onnx
