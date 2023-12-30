@@ -1,8 +1,10 @@
-SpeechCommands
+model_training/SpeechCommands
 __pycache__
-.venv
-model
-model_adam*
+model_training/.venv
+model_training/checkpoints/*
+model_training/lightning_logs/*
+model_training/*.onnx
+*.ckpt
 *.tar.gz
 src/__pycache__
 model.onnx

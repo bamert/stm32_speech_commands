@@ -112,9 +112,8 @@ class AudioDataModule(LightningDataModule):
 
     def setup(self, stage=None):
         pass
-        #if stage == "fit" or stage is None:
-        #    if stage == "test" or stage is None:
-    def num_classes(self) -> int:
+    @staticmethod
+    def num_classes() -> int:
         return SubsetSC.num_labels()
 
     def train_dataloader(self):

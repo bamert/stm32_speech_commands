@@ -86,7 +86,7 @@ class M4(nn.Module):
 
 
 class AudioClassifier(pl.LightningModule):
-    def __init__(self, num_labels):
+    def __init__(self, num_labels:int=36):
         super().__init__()
         self.val_correct_outputs = 0
         self.val_total_outputs = 0
@@ -101,23 +101,26 @@ class AudioClassifier(pl.LightningModule):
         loss = F.nll_loss(output.squeeze(), target)
         return loss
 
+    def test_step(self, batch, batch_idx):
+        self.validation_step(batch, batch_idx)
     def validation_step(self, batch, batch_idx):
         data, target = batch
         output = self(data)
         loss = F.nll_loss(output.squeeze(), target)
 
         # Calculate accuracy
-        pred = output.argmax(dim=-1)#, keepdim=True)  # Get the index of the max log-probability
+        pred = output.argmax(dim=-1)
 
         correct = pred.squeeze().eq(target).sum().item()
         self.val_correct_outputs += correct
         self.val_total_outputs += target.size(0)
 
         self.log('val_loss', loss, prog_bar=True, on_epoch=True)
-        #self.log('val_accuracy', accuracy, on_epoch=True)
 
         # Return a dictionary that includes loss and accuracy
         return {"val_loss": loss}
+    def on_test_epoch_end(self):
+        self.on_validation_epoch_end()
     def on_validation_epoch_end(self):
 
         # Aggregate accuracies
