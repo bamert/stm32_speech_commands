@@ -3,7 +3,6 @@ __pycache__
 model_training/.venv
 model_training/checkpoints/*
 model_training/lightning_logs/*
-model_training/*.onnx
 stm32_inference/build/*
 *.ckpt
 *.tar.gz
