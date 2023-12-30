@@ -80,12 +80,11 @@ class SubsetSC(SPEECHCOMMANDS):
         label = item[2]
         waveform = self.resample(waveform)
         # Pad or trim the waveform to a fixed length (e.g., corresponding to 8000 samples)
-        target_length = self.new_sample_rate # Adjust as needed
-        if waveform.size(1) > target_length:
-            waveform = waveform[:, :target_length]  # Trim
-        elif waveform.size(1) < target_length:
+        if waveform.size(1) > self.new_sample_rate:
+            waveform = waveform[:, :self.new_sample_rate]  # Trim
+        elif waveform.size(1) < self.new_sample_rate:
             # Pad
-            padding_size = target_length - waveform.size(1)
+            padding_size = self.new_sample_rate - waveform.size(1)
             padding = torch.zeros((waveform.size(0), padding_size))
             waveform = torch.cat((waveform, padding), dim=1)
 
