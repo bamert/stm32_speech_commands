@@ -1,6 +1,7 @@
 # STM32 Speech Commands
 
 The code in this repo demonstrates keyword spotting with very limited compute on STM32L4 microcontrollers based on the speech commands dataset ( [paper](https://arxiv.org/abs/1804.03209) ).
+The model recognizes 35 different [keywords](model-training/dataset.py) and runs at 4+ inferences per second on the target STM32L4 device 
 Contrary to other approaches on this dataset, the model in this implementation does not aim to be as accurate as possible. Instead, we want to keep inference time low given the
 constrained embedded environment, while still achieving reasonable accuracy. For reference, the model can be run and tested out in the browser [here](https://www.nikbamert.com/browser_demo_inference.html)
 
