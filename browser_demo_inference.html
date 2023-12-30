@@ -13,9 +13,11 @@
     <select id="input-device"></select>
     <br><button id="startRecordingButton">Start Listening</button>
     <p>
-    Say one of the following words to update the class prediction probabilities.
-    This model uses 1.6M FLOPs (0.8M multiply-accumulate) and 60K ram for inference.
-    One forward pass runs in 180ms on an STM32L4 device @ 80MHz.
+    Click "Start listening" and say one of the words in the list below to update the class prediction probabilities.
+    <br><br>
+    One forward pass of this model requires 1.6M FLOPs (0.8M multiply-accumulate).
+    On the device where this page is currently being displayed, one forward pass takes <span id="forward_ms"></span> ms (wall time).
+    <br>On the STM32L4 target device, one forward pass takes 180ms@80MHz and uses 60K ram.
     </p>
     <div id="probabilities"></div>
     <br>
@@ -69,7 +71,6 @@
 
         async function loadModel() {
             session = await ort.InferenceSession.create(modelUrl);
-            console.log(zeroProbs());
             renderProbabilities(zeroProbs());
         }
 
@@ -83,16 +84,16 @@
             // Run the model
             const inputTensor = new ort.Tensor('float32', Float32Array.from(samples), [1, 1, bufferLength]);
             const inputs = {input: inputTensor}; // 'input' here should match the input name in your model
+            const inferenceStartMs = performance.now();
             session.run(inputs).then((outputMap) => {
-                // Let's assume outputMap.output.data is your dictionary
-                let dataDict = outputMap.output.data;
-
-                // Convert the dictionary to a list
-                let data = Object.values(dataDict);
+                // Show inference time
+                const inferenceMs = performance.now() - inferenceStartMs;
+                document.getElementById('forward_ms').innerHTML = inferenceMs.toFixed(2);
 
                 // Convert outputData to softmax probabilities
-                let probs = data.map(value => Math.exp(value)); //softmax(outputData);
-                let largestIndex = probs.indexOf(Math.max(...probs));
+                let dataDict = outputMap.output.data;
+                let data = Object.values(dataDict);
+                let probs = data.map(value => Math.exp(value)); 
                 let probsWithClassNames = probs.map((prob, index) => ({
                     'name':SC_CLASSES[index],
                     'prob':prob
