@@ -241,9 +241,7 @@ int double_buffer_chunk(int16_t* buf, uint32_t length) {
   write_offset += length;
   if (write_offset == RINGBUFFER_SIZE) {
       write_offset = 0;
-      //buffer_filled=true;
   }
-  //printf("write_offset %u\r\n", write_offset);
   num_samples_until_inference-=length;
   // Once buffer filled for the first time, start doing overlapping
   // inferences on arrival of each 2000 elements (~250ms of audio).
@@ -260,7 +258,6 @@ int double_buffer_chunk(int16_t* buf, uint32_t length) {
           target_ptr[length_1+j] = (float) ringbuffer[j];
     }
     // Advance readoffset by 
-    //printf("inference from read_offset %u\r\n", read_offset);
     read_offset+= INFERENCE_PERIOD; 
     num_samples_until_inference = INFERENCE_PERIOD;
     if (model_busy){
@@ -290,7 +287,10 @@ float standardize_data(float* data, uint32_t length) {
     arm_mean_f32(data, length, &mean);
 
     // Calculate the standard deviation
-    arm_std_f32(data, length, &stddev);
+    // arm_std_f32(data, length, &stddev);
+    // Fix downscaling to match nearby speaker
+    // Avoid unnecessarily upscaling noise
+    stddev = 250.;
 
     //printf("Mean: %.5f, Stddev %.5f\r\n", mean, stddev);
     // Standardize the data
@@ -307,12 +307,6 @@ void run_inference(){
         printf("ERROR. input data pointer has not been setup\r\n");
     }
     float volume_stddev = standardize_data(&input_ptr[0], 8000);
-    if (volume_stddev < 40){
-        // Avoids scaling background noise up too much
-        // This threshold is experimental and intended
-        model_busy = false;
-        return;
-    }
     // Run inference
     uint32_t start = HAL_GetTick();
     int res = ai_run();
@@ -338,22 +332,49 @@ uint32_t VectorMaximum(float* vector){
   }
   return idx;
 }
+int compareFloats(const void * a, const void * b) {
+    float fa = *(const float*) a;
+    float fb = *(const float*) b;
+    return (fa > fb) - (fa < fb);
+}
+void findSecondLargest(const float array[], int size, int maxIndex, float *secondLargest, int *secondLargestIndex) {
+    *secondLargest = FLT_MIN;
+    *secondLargestIndex = -1;
+
+    for (int i = 0; i < size; ++i) {
+        if (i != maxIndex && array[i] > *secondLargest) {
+            *secondLargest = array[i];
+            *secondLargestIndex = i;
+        }
+    }
+}
 int post_process(int inference_time, float volume_stddev)
 {
    float* outdat = (float*)(ai_output[0].data);
-   float maxValue;
+   float maxScore;
    uint32_t maxIndex;
 
-    // Find the maximum value and its index
-    arm_max_f32(outdat, AI_SPEECH_OUT_1_SIZE, &maxValue, &maxIndex);
-    float score = exp(maxValue);
+   // Softmax probabilities
+   for (int i = 0; i < AI_SPEECH_OUT_1_SIZE; i++) {
+      outdat[i] = exp(outdat[i]);
+   }
+   // Find the maximum value and its index
+   arm_max_f32(outdat, AI_SPEECH_OUT_1_SIZE, &maxScore, &maxIndex);
+   
+   // Find second largest
+   float secondLargestScore;
+   uint32_t secondLargestIndex;
+   findSecondLargest(outdat, AI_SPEECH_OUT_1_SIZE, maxIndex, &secondLargestScore, &secondLargestIndex);
+   float certaintyMargin = maxScore - secondLargestScore;
+
+   //float score = exp(maxValue);
    if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
        printf("Invalid max index\r\n");
        return 0;
-   } else if ( score < 0.7){
+   } else if ( certaintyMargin < 0.8){
        //printf("((score: %0.2f, class %s))\r\n\r\n", score, speech_classes[maxIndex]);
    } else {
-      printf("Prediction: class %s, score %0.2f, volume stddev %0.2f, inference time %u ms\r\n", speech_classes[maxIndex], score, volume_stddev, inference_time);
+      printf("Prediction: class %s, score %0.2f, volume stddev %0.2f, inference time %u ms\r\n", speech_classes[maxIndex], maxScore, volume_stddev, inference_time);
    }
 
     return 0;
