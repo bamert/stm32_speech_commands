@@ -292,9 +292,7 @@ float standardize_data(float* data, uint32_t length) {
     // Avoid unnecessarily upscaling noise
     stddev = 250.;
 
-    //printf("Mean: %.5f, Stddev %.5f\r\n", mean, stddev);
     // Standardize the data
-    // mean 32, stddev 16 for rightbitshift 3 in 16bit data works.
     for (uint32_t i = 0; i < length; i++) {
         data[i] = (data[i] - mean) / stddev;
     }
@@ -337,14 +335,12 @@ int compareFloats(const void * a, const void * b) {
     float fb = *(const float*) b;
     return (fa > fb) - (fa < fb);
 }
-void findSecondLargest(const float array[], int size, int maxIndex, float *secondLargest, int *secondLargestIndex) {
+void findSecondLargest(const float array[], int size, int maxIndex, float *secondLargest) {
     *secondLargest = FLT_MIN;
-    *secondLargestIndex = -1;
 
     for (int i = 0; i < size; ++i) {
         if (i != maxIndex && array[i] > *secondLargest) {
             *secondLargest = array[i];
-            *secondLargestIndex = i;
         }
     }
 }
@@ -358,23 +354,19 @@ int post_process(int inference_time, float volume_stddev)
    for (int i = 0; i < AI_SPEECH_OUT_1_SIZE; i++) {
       outdat[i] = exp(outdat[i]);
    }
-   // Find the maximum value and its index
+   // Find maximum probability and its index
    arm_max_f32(outdat, AI_SPEECH_OUT_1_SIZE, &maxScore, &maxIndex);
    
-   // Find second largest
+   // Find second largest probability
    float secondLargestScore;
-   uint32_t secondLargestIndex;
-   findSecondLargest(outdat, AI_SPEECH_OUT_1_SIZE, maxIndex, &secondLargestScore, &secondLargestIndex);
+   findSecondLargest(outdat, AI_SPEECH_OUT_1_SIZE, maxIndex, &secondLargestScore);
    float certaintyMargin = maxScore - secondLargestScore;
 
-   //float score = exp(maxValue);
    if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
        printf("Invalid max index\r\n");
        return 0;
-   } else if ( certaintyMargin < 0.8){
-       //printf("((score: %0.2f, class %s))\r\n\r\n", score, speech_classes[maxIndex]);
-   } else {
-      printf("Prediction: class %s, score %0.2f, volume stddev %0.2f, inference time %u ms\r\n", speech_classes[maxIndex], maxScore, volume_stddev, inference_time);
+   } else if ( certaintyMargin > 0.8){
+      printf("Prediction: class %s, score %0.2f, inference time %u ms\r\n", speech_classes[maxIndex], maxScore, inference_time);
    }
 
     return 0;
