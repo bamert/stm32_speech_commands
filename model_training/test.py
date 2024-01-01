@@ -12,7 +12,7 @@ def main(checkpoint_path):
     trainer = pl.Trainer(
         accelerator='gpu' if torch.cuda.is_available() else 'cpu',
         devices=1)
-    trainer.test(model, datamodule=data_module)
+    trainer.validate(model, datamodule=data_module)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script for audio classifier.')

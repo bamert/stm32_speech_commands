@@ -29,10 +29,10 @@ def main(checkpoint_path=None, sample_rate_hz=8000):
 
     checkpoint_callback = ModelCheckpoint(
         dirpath='checkpoints/',
-        filename='audio-classifier-{epoch:02d}',
-        save_top_k=3,
+        filename='audio-classifier-m5-c32-k10-{epoch:02d}',
+        save_top_k=1,
         monitor='val_accuracy',
-        mode='min',
+        mode='max',
     )
     steps_per_epoch = len(data_module.train_dataloader())
     trainer = pl.Trainer(

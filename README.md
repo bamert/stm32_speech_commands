@@ -10,6 +10,7 @@ suitable for continuous monitoring applications.
 ## Model Specifications
 - Utilizes a modified [M5 model](https://arxiv.org/abs/1610.00087), processing raw waveforms (no spectrogram).
 - Dataset: Recognizes 35 keywords from the [speech commands dataset](https://arxiv.org/abs/1804.03209).
+- Audio sampling rate: 8kHz, 1 sec frames.
 - Inference Time (Cortex M4): ~ 190ms at 80Mhz (Cortex M4).
 - Inference Time (Browser):  ~ 1-5ms depending on device
 - Memory Usage (Cortex M4): Consumes about 60Kb RAM.
@@ -27,11 +28,26 @@ suitable for continuous monitoring applications.
 
 
 ## Model accuracy / inference time tradeoff
-| Model | val acc. | stm32 inference time [ms] | MFLOP | kParams |
-| ------------- | ------------- | ---- | ---- | ---- |
-| M5 (c=32, k=80) | 0.853 | 603 | 3.8 | 166 |
-| M5 (c=16, k=80) | 0.79 | -  |  - | - |
-| M5 (c=16, k=40) | 0.863 | 595 |  2.4 | 99 |
-| M5 (c=16, k=20) | 0.852 | 246 |  1.8 | 98 |
-| M5 (c=16, k=10) | 0.812 | 180 |  1.6 | 97 |
 
+| Model | val acc. | post-rejection val acc.(% rejected) | stm32 inference time [ms] | MFLOP | kParams |
+| ------------- | ------------- | ---- | ---- | ---- |
+| M5-c32-k80) | 86.6 | 96.9 (23.1)| 603 | 3.8 | 166 |
+| M5-c16-k80) | 81.7 | 96.3 (37.4)| -  |  - | - |
+| M5-c32-k40) | 87.6 | 97.2 (23.0)| 595 |  2.4 | 99 |
+| M5-c32-k20) | 86.2 | 96.6 (23.8)| 246 |  1.8 | 98 |
+| M5-c32-k10) | 84.5 | 96.5 (28.4)| **180** |  1.6 | 97 |
+
+The above table shows some of the model configurations that were tried out. The first row
+shows the original configuration of the [M5 model by Dai et al](https://arxiv.org/abs/1610.00087). 
+
+The STM32 inferences engine acquires and runs inference on overlapping audio frames of 1 second length (8kHz; 8000samples)
+every 250ms. This is to ensure that the longer keywords ("visual", "marvin", ..) have a higher likelihood of being fully contained
+in one of the frames as opposed to being cut in half. To enable 4 inferences per second, the inference time of the model has to be under 250ms.
+
+Experiments with a smaller kernel length for the initial 1D convolution showed that reasonable performance can also be reached with a much smaller `k=10`.
+The accuracy on the validation split with this model is 84.5%. For keyword spotting applications it is more acceptable
+to miss an unclear keyword rather than making a false positive prediction. For this reason we use the distance between the class with the highest and second highest probabilities
+as a proxy for the confidence of the prediction. We only make a prediction if this distance is > 75%. Given this additional criterion to avoid false positives,
+all models reach an accuracy in excess of 96% on the non-rejected validation samples. 
+
+The model used in the stm32 and browser inference engines above is the `M5-c32-k10`.
