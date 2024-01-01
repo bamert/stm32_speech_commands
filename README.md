@@ -1,9 +1,10 @@
 # Efficient Keyword Spotting for Embedded Systems
 
 This repository demonstrates an efficient keyword spotting system tailored for STM32L4 microcontrollers, 
-balancing accuracy and speed for real-time audio processing in embedded systems. 
-Deployed on an STM32L4 running at 80Mhz it recognizes [35 different keywords](model_training/dataset.py#L9-L44) and achieves an inference latency of 190ms, 
-suitable for continuous monitoring applications.
+balancing accuracy and speed for real-time audio processing in resource-constrained embedded systems. 
+
+Deployed on an STM32L475(128KB SRAM, 80MHz) it recognizes [35 different keywords](model_training/dataset.py#L9-L44) and achieves a post-rejection accuracy of 96\% at an inference latency of 190ms, 
+suitable for streaming applications.
 
 **Demo** For reference, the model can be tested in the browser [here](https://www.nikbamert.com/browser_demo_inference.html).
 
