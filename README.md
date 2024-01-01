@@ -29,7 +29,7 @@ suitable for continuous monitoring applications.
 
 ## Model accuracy / inference time tradeoff
 
-| Model | val acc. | post-rejection val acc.(% rejected) | stm32 inference time [ms] | MFLOP | kParams |
+| Model | val acc. | pr val acc.(% rejected) | stm32 inference time [ms] | MFLOP | kParams |
 | ------------- | ------------- | ---- | ---- | ---- | ---- |
 | M5-c32-k80 | 86.6 | 96.9 (23.1)| 603 | 3.8 | 166 |
 | M5-c16-k80 | 81.7 | 96.3 (37.4)| -  |  - | - |
@@ -48,6 +48,6 @@ Experiments with a smaller kernel length for the initial 1D convolution showed t
 The accuracy on the validation split with this model is 84.5%. For keyword spotting applications it is more acceptable
 to miss an unclear keyword rather than making a false positive prediction. For this reason we use the distance between the class with the highest and second highest probabilities
 as a proxy for the confidence of the prediction. We only make a prediction if this distance is > 75%. Given this additional criterion to avoid false positives,
-all models reach an accuracy in excess of 96% on the non-rejected validation samples. 
+all models reach a post-rejection accuracy in excess of 96% on the non-rejected validation samples (pr val acc). 
 
 The model used in the stm32 and browser inference engines above is the `M5-c32-k10`.
