@@ -88,8 +88,10 @@ class M4(nn.Module):
 class AudioClassifier(pl.LightningModule):
     def __init__(self, num_labels:int=36):
         super().__init__()
-        self.val_correct_outputs = 0
-        self.val_total_outputs = 0
+        self.val_correct = 0
+        self.val_total = 0
+        self.val_pr_correct = 0
+        self.val_pr_total = 0
         self.model = M5(n_input=1, n_output=num_labels, kernel_size=10)
 
     def forward(self, x):
@@ -105,30 +107,50 @@ class AudioClassifier(pl.LightningModule):
         self.validation_step(batch, batch_idx)
     def validation_step(self, batch, batch_idx):
         data, target = batch
-        output = self(data)
-        loss = F.nll_loss(output.squeeze(), target)
+        log_probs = self(data)
+        val_loss = F.nll_loss(log_probs.squeeze(), target)
+
 
         # Calculate accuracy
-        pred = output.argmax(dim=-1)
+        probs = torch.exp(log_probs)
+        pred = probs.argmax(dim=-1)
 
         correct = pred.squeeze().eq(target).sum().item()
-        self.val_correct_outputs += correct
-        self.val_total_outputs += target.size(0)
+        self.val_correct += correct
+        self.val_total += target.size(0)
 
-        self.log('val_loss', loss, prog_bar=True, on_epoch=True)
+        # Calculate pr-acc (post-rejection accuracy)
+        # We reject all predictions that have a confidence margin < 0.75
+        top2 = probs.topk(2, dim=-1)  # Get top 2 probabilities
+        confidence_diff = top2.values[:, 0] - top2.values[:, 1]  
+        not_rejected = confidence_diff >= 0.75  # Boolean mask for samples that were not rejected.
+        self.val_pr_correct += (pred.squeeze().eq(target) & not_rejected).sum().item()  # Correct and not rejected
+        self.val_pr_total += not_rejected.sum().item()  # Total not rejected
+
+        self.log('val_loss', val_loss, prog_bar=True, on_epoch=True)
 
         # Return a dictionary that includes loss and accuracy
-        return {"val_loss": loss}
+        return {"val_loss": val_loss}
     def on_test_epoch_end(self):
         self.on_validation_epoch_end()
     def on_validation_epoch_end(self):
 
         # Aggregate accuracies
-        avg_accuracy = self.val_correct_outputs / self.val_total_outputs 
+        avg_accuracy = self.val_correct / self.val_total 
         self.log('val_accuracy', avg_accuracy, prog_bar=True, on_epoch=True)
-        self.val_total_outputs = 0
-        self.val_correct_outputs = 0
 
+
+        avg_pr_accuracy = self.val_pr_correct / self.val_pr_total 
+        self.log('val_pr_accuracy', avg_pr_accuracy, prog_bar=True, on_epoch=True)
+        rejection_percentage = 1. - (self.val_pr_total / self.val_total)
+        self.log('val_pct_rejected', rejection_percentage, prog_bar=True, on_epoch=True)
+        self.log('val_num_rejected', self.val_total - self.val_pr_total, prog_bar=True, on_epoch=True)
+
+
+        self.val_total = 0
+        self.val_correct = 0
+        self.val_pr_total = 0
+        self.val_pr_correct = 0
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=0.01, weight_decay=0.0001)

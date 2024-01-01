@@ -8,10 +8,10 @@ suitable for continuous monitoring applications.
 **Demo** For reference, the model can be tested in the browser [here](https://www.nikbamert.com/browser_demo_inference.html).
 
 ## Model Specifications
-- Utilizes a modified [M5 model](https://arxiv.org/abs/1610.00087), processing raw waveforms for enhanced responsiveness.
-- Dataset: Recognizes 35 keywords from the speech commands dataset.
+- Utilizes a modified [M5 model](https://arxiv.org/abs/1610.00087), processing raw waveforms (no spectrogram).
+- Dataset: Recognizes 35 keywords from the [speech commands dataset](https://arxiv.org/abs/1804.03209).
 - Inference Time (Cortex M4): ~ 190ms at 80Mhz (Cortex M4).
-- Inference Time (Browser):  ~ 1-5ms depending on Device
+- Inference Time (Browser):  ~ 1-5ms depending on device
 - Memory Usage (Cortex M4): Consumes about 60Kb RAM.
 
 ## Repository Structure
@@ -25,4 +25,13 @@ suitable for continuous monitoring applications.
     - A firmware binary is available at `stm32_inference/build/speechmodel_code.bin`.
 - Includes a no-frills browser inference engine in `browser_inference/browser_demo_inference.html` 
 
+
+## Model accuracy / inference time tradeoff
+| Model | val acc. | stm32 inference time [ms] | MFLOP | kParams |
+| ------------- | ------------- | ---- | ---- | ---- |
+| M5 (c=32, k=80) | 0.853 | 603 | 3.8 | 166 |
+| M5 (c=16, k=80) | 0.79 | -  |  - | - |
+| M5 (c=16, k=40) | 0.863 | 595 |  2.4 | 99 |
+| M5 (c=16, k=20) | 0.852 | 246 |  1.8 | 98 |
+| M5 (c=16, k=10) | 0.812 | 180 |  1.6 | 97 |
 
