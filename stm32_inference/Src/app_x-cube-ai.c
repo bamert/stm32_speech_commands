@@ -308,7 +308,7 @@ void run_inference(){
     // Run inference
     uint32_t start = HAL_GetTick();
     int res = ai_run();
-    int inference_time_ms = HAL_GetTick() - start;
+    uint32_t inference_time_ms = HAL_GetTick() - start;
     /* 3- post-process the predictions */
     if (res == 0){
         res = post_process(inference_time_ms, volume_stddev);

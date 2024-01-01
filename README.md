@@ -1,21 +1,31 @@
-# STM32 Keyword Spotting
+## Efficient Keyword Spotting for Embedded Systems
 
-The code in this repo demonstrates keyword spotting ("yes", "off", "on", "up", "right", ..) with very limited compute on STM32L4 microcontrollers based on the speech commands dataset ( [paper](https://arxiv.org/abs/1804.03209) ).
-The model recognizes 35 different [keywords](model_training/dataset.py) and runs at 4+ inferences per second on the target STM32L4 device.
-Contrary to other approaches for this dataset, the model in this implementation does not aim to be as accurate as possible. Instead, we want to keep inference time low given the
-constrained embedded environment, while still achieving reasonable accuracy. 
+# Overview
+This repository demonstrates an efficient keyword spotting system tailored for STM32L4 microcontrollers, 
+balancing accuracy and speed for real-time audio processing in embedded systems. 
+Deployed on an STM32L4 running at 80Mhz, achieves an inference latency of 190ms, suitable for continuous monitoring applications.
 
-For reference, the model can be run and tested in the browser [here](https://www.nikbamert.com/browser_demo_inference.html).
+**Demo** For reference, the model can be tested in the browser [here](https://www.nikbamert.com/browser_demo_inference.html).
 
-# Repo structure
-- `model_training` Pytorch Lightning training code. 
-- `browser_inference` Demo inference code for the browser. Also served [here](https://www.nikbamert.com/browser_demo_inference.html)
-- `stm32_inference` STM32 inference engine with firmware image for [B-L475-IOT01A](https://www.st.com/en/evaluation-tools/b-l475e-iot01a.html) board by ST.
+# Key Features
+- Optimized for Embedded Systems: Designed for real-time performance on STM32L4 microcontrollers.
+- Resource-Efficient: Achieves high efficiency with limited computational resources.
+- Model Design: Utilizes a modified M5 model, processing raw waveforms for enhanced responsiveness.
+- Live Demo: Experience the model in action via our browser demo.
 
-# Model specifics
-The model is a modified version of the [M5](https://arxiv.org/abs/1610.00087) model by Dai et al. and operates directly on the raw waveform rather than using a spectrogram / MFC features.
+# Repository Structure
+- `model_training`: Contains Pytorch Lightning training code.
+- `browser_inference`: Includes browser-based demo inference code. Try it here.
+- `stm32_inference`: Features STM32-specific inference engine with firmware for B-L475-IOT01A board.
 
-# Inference engine 
-One forward pass on the STM32L4 takes about 180ms at 80Mhz. Ram usage is around 60Kb. 
-The inference engine for both browser and stm32 record audio at 8kHz and run inference on overlapping 1sec samples about every 250ms.
+# Model Specifications
+- Dataset: Recognizes 35 keywords from the speech commands dataset.
+- Inference Time: Approximately 190ms at 80Mhz.
+- Memory Usage: Consumes about 60Kb RAM.
+
+# Getting Started
+- The python requirements are managed with `poetry`. They are installed with `cd model_training && poetry install`.
+- The stm32 code requires the arm gcc: `arm-none-eabi-gcc`. Build the code with `cd stm32_inference && make`.
+    - A firmware binary is available at `stm32_inference/build/speechmodel_code.bin`.
+- Includes a no-frills browser inference engine in `browser_inference/browser_demo_inference.html` 
 
