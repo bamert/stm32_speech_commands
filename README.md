@@ -37,7 +37,7 @@ suitable for continuous monitoring applications.
 | M5-c32-k20 | 86.2 | 96.6 (23.8)| 246 |  1.8 | 98 |
 | M5-c32-k10 | 84.5 | 96.5 (28.4)| **180** |  1.6 | 97 |
 
-The above table shows some of the model configurations that were tried out. The first row
+The above table shows some of the model configurations that were tried. The first row
 shows the original configuration of the [M5 model by Dai et al](https://arxiv.org/abs/1610.00087). 
 
 The STM32 inferences engine acquires and runs inference on overlapping audio frames of 1 second length (8kHz; 8000samples)
