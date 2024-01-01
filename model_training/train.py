@@ -31,12 +31,12 @@ def main(checkpoint_path=None, sample_rate_hz=8000):
         dirpath='checkpoints/',
         filename='audio-classifier-{epoch:02d}',
         save_top_k=3,
-        monitor='val_loss',
+        monitor='val_accuracy',
         mode='min',
     )
     steps_per_epoch = len(data_module.train_dataloader())
     trainer = pl.Trainer(
-            max_epochs=12,  # Adjust as needed
+            max_epochs=30,  
         accelerator='gpu' if torch.cuda.is_available() else 'cpu',
         devices=1,
         callbacks=[checkpoint_callback],

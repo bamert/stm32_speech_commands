@@ -136,11 +136,11 @@ class AudioClassifier(pl.LightningModule):
     def on_validation_epoch_end(self):
 
         # Aggregate accuracies
-        avg_accuracy = self.val_correct / self.val_total 
+        avg_accuracy = self.val_correct / self.val_total if self.val_total > 0 else 0
         self.log('val_accuracy', avg_accuracy, prog_bar=True, on_epoch=True)
 
 
-        avg_pr_accuracy = self.val_pr_correct / self.val_pr_total 
+        avg_pr_accuracy = self.val_pr_correct / self.val_pr_total if self.val_pr_total > 0 else 0
         self.log('val_pr_accuracy', avg_pr_accuracy, prog_bar=True, on_epoch=True)
         rejection_percentage = 1. - (self.val_pr_total / self.val_total)
         self.log('val_pct_rejected', rejection_percentage, prog_bar=True, on_epoch=True)
@@ -154,7 +154,7 @@ class AudioClassifier(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=0.01, weight_decay=0.0001)
-        scheduler = {'scheduler': optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1),
-                     'interval': 'epoch'}  # Change interval to 'step' if needed
+        scheduler = {'scheduler': optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1),
+                     'interval': 'epoch'}  
         return [optimizer], [scheduler]
 
