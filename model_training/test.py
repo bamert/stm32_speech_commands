@@ -4,13 +4,20 @@ import pytorch_lightning as pl
 from dataset import AudioDataModule
 from models import AudioClassifier
 
+def get_accelerator():
+    if torch.cuda.is_available():
+        return 'gpu' 
+    elif torch.backends.mps.is_available():
+        return 'mps'
+    else:
+        return 'cpu'
 def main(checkpoint_path):
     data_module = AudioDataModule(batch_size=256, num_workers=4, pin_memory=True, sample_rate_hz=8000)
     num_labels = data_module.num_classes()
     model = AudioClassifier.load_from_checkpoint(checkpoint_path)
 
     trainer = pl.Trainer(
-        accelerator='gpu' if torch.cuda.is_available() else 'cpu',
+        accelerator=get_accelerator(),
         devices=1)
     trainer.validate(model, datamodule=data_module)
 
