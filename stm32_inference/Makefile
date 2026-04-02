@@ -145,6 +145,7 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffuncti
 
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
+
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
 endif
@@ -213,10 +214,16 @@ $(BUILD_DIR):
 #######################################
 clean:
 	-rm -fR $(BUILD_DIR)
-  
+
 #######################################
 # dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
 
+FLASH_HOST ?= gx10
+FLASH_DIR  ?= /mnt/stm32/
+
+flash:
+	rsync -avz $(BUILD_DIR)/$(TARGET).bin $(FLASH_HOST):$(FLASH_DIR)
+	ssh $(FLASH_HOST) "sync"
 # *** EOF ***

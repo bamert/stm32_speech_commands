@@ -266,9 +266,9 @@ int double_buffer_chunk(int16_t* buf, uint32_t length) {
           return 1;
     }
     start_inference();
-  }
-  if (read_offset == RINGBUFFER_SIZE) {
-      read_offset = 0;
+      if (read_offset == RINGBUFFER_SIZE) {
+          read_offset = 0;
+      }
   }
   return 0;
 
@@ -365,9 +365,9 @@ int post_process(int inference_time, float volume_stddev)
    if  (maxIndex < 0 || maxIndex > AI_SPEECH_OUT_1_SIZE -1 ) {
        printf("Invalid max index\r\n");
        return 0;
-   } else if ( certaintyMargin > 0.8){
+   } else { //if ( certaintyMargin > 0.8){
       printf("Prediction: class %s, score %0.2f, inference time %u ms\r\n", speech_classes[maxIndex], maxScore, inference_time);
-   }
+   } 
 
     return 0;
 }
