@@ -1,9 +1,11 @@
 model_training/SpeechCommands
 __pycache__
 model_training/.venv
+model_training/report/*
 model_training/checkpoints/*
 model_training/lightning_logs/*
 stm32_inference/build/*
 *.ckpt
 *.tar.gz
 src/__pycache__
+.DS_Store

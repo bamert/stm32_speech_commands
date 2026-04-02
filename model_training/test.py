@@ -11,19 +11,30 @@ def get_accelerator():
         return 'mps'
     else:
         return 'cpu'
-def main(checkpoint_path):
-    data_module = AudioDataModule(batch_size=256, num_workers=4, pin_memory=True, sample_rate_hz=8000)
-    num_labels = data_module.num_classes()
-    model = AudioClassifier.load_from_checkpoint(checkpoint_path)
+
+def main(checkpoint_path, mode="1d"):
+    data_module = AudioDataModule(
+        batch_size=256, 
+        num_workers=4, 
+        pin_memory=True, 
+        sample_rate_hz=8000, 
+        mode=mode
+    )
+    
+    model = AudioClassifier.load_from_checkpoint(checkpoint_path, mode=mode)
 
     trainer = pl.Trainer(
         accelerator=get_accelerator(),
-        devices=1)
+        devices=1
+    )
     trainer.validate(model, datamodule=data_module)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script for audio classifier.')
     parser.add_argument('--checkpoint', type=str, required=True, help='Checkpoint file to load the model for testing')
+    
+    parser.add_argument('--mode', type=str, choices=['1d', '2d'], default='1d', help='Choose pipeline to run: 1d (raw audio) or 2d (mel spectrogram)')
+    
     args = parser.parse_args()
 
-    main(args.checkpoint)
+    main(args.checkpoint, args.mode)

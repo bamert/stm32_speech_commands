@@ -7,22 +7,26 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy>=2.2.6",
     "onnx>=1.19.1",
+    "pandas>=2.3.3",
+    "plotnine>=0.15.3",
+    "pystm32ai>=1.0.1",
     "pytorch-lightning>=2.5.5",
+    "scipy>=1.15.3",
     "torch >=2.0.0",
     "torchaudio >=2.0.0",
-    "torchcodec>=0.8.1",
+    "torchinfo>=1.8.0",
     "tqdm>=4.67.1",
 ]
 
 [[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
 explicit = true
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cpu" },
+  { index = "pytorch-cu130", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" },
 ]
 torchaudio = [
-  { index = "pytorch-cpu" },
+  { index = "pytorch-cu130", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" },
 ]
